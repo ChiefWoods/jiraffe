@@ -56,6 +56,9 @@ router.post('/login', async (request,response) => {
                 message: 'Invalid email or password' 
             });
         }
+        //JWT
+        // const jwt = require('jsonwebtoken');
+        // const token = jwt.sign({ userId: user._id }, 'your-secret-key', { expiresIn: '1h' }); 
 
         return response.status(200).send({ message: 'Login successful' }); 
     }catch(error){
