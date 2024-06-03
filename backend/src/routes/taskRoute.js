@@ -20,14 +20,15 @@ taskRouter.get('/:task_id', async (req, res) => {
 taskRouter.put('/:task_id', async (req, res) => {
     try {
       const { task_id } = req.params;
-      const { name, desc } = req.body;
+      const { name, desc, status } = req.body;
 
       if (!name) {
         return res.status(400).json({ error: "Name is required." });
       } else if (!desc) {
         return res.status(400).json({ error: "Description is required." });
+      } else if (!status) {
+        return res.status(400).json({ error: "Status is required." });
       }
-
 
       const result = await Task.findByIdAndUpdate(task_id, req.body);
 
@@ -59,5 +60,7 @@ taskRouter.delete('/:task_id', async (request, response) => {
         response.status(500).send({ message: error.message });
     }
 });
+
+
 
 export default taskRouter;

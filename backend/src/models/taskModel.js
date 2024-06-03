@@ -15,6 +15,11 @@ const taskSchema = mongoose.Schema(
     desc: {
       type: String,
     },
+    status: {
+      type: String,
+      enum: ['TO DO', 'IN PROGRESS', 'DONE'],
+      default: 'TO DO',
+    }
   },
   {
     timestamps: true,
