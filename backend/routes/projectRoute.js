@@ -2,12 +2,13 @@ import express from 'express';
 import { Project } from '../models/projectModel.js';
 import { User } from '../models/userModel.js';
 import { Task } from '../models/taskModel.js';
+import { app } from '../src/server.js';
 
-const router = express.Router();
+
 
 
 //Route for add a new project
-router.post('/', async (request,response) => {
+app.post('/', async (request,response) => {
     try{
         if(
             !request.body.title ||
@@ -34,7 +35,7 @@ router.post('/', async (request,response) => {
 });
 
 //Route for get all books
-router.get('/', async (request, response) => {
+app.get('/', async (request, response) => {
     try{
         const books = await Book.find({});
         return response.status(200).json({
@@ -48,7 +49,7 @@ router.get('/', async (request, response) => {
 });
 
 //Route for get one book by id
-router.get('/:id', async (request, response) => {
+app.get('/:id', async (request, response) => {
     try{
 
         const { id } = request.params;
@@ -62,7 +63,7 @@ router.get('/:id', async (request, response) => {
 });
 
 //Route for update a book
-router.put('/:id', async (request, response) => {
+app.put('/:id', async (request, response) => {
     try{
         if(
             !request.body.title ||
@@ -90,7 +91,7 @@ router.put('/:id', async (request, response) => {
 });
 
 //Route for delete a book
-router.delete('/:id', async (request, response) => {
+app.delete('/:id', async (request, response) => {
     try{
         const { id } = request.params;
 
@@ -108,4 +109,4 @@ router.delete('/:id', async (request, response) => {
     }
 });
 
-export default router;
+export default app;
