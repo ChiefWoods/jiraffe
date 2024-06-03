@@ -1,6 +1,7 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import authenticationRoute from './routes/authenticationRoute.js';
+import projectRoute from './routes/projectRoute.js';
 import cors from 'cors';
 import dotenv from 'dotenv';
 dotenv.config();
@@ -29,6 +30,7 @@ app.get('/', (request, response) => {
 });
 
 app.use('/auth', authenticationRoute);
+app.use('/project', projectRoute);
 
 mongoose
     .connect(process.env.MONGODB_URI)
