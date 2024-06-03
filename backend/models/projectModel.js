@@ -6,12 +6,6 @@ const projectSchema = mongoose.Schema(
         name:{
             type: String,
             required: true,
-            unique: true,
-        },
-        key:{
-            type: String,
-            required: true,
-            unique: true,
         },
         admin:{
             type: mongoose.Schema.Types.ObjectId,
