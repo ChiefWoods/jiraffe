@@ -3,7 +3,7 @@ import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
 import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
-import { About, Test } from './pages';
+import { Test } from './pages';
 
 const App = () => {
   return (
