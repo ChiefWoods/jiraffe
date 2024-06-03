@@ -1,3 +1,5 @@
-import About from './About';
+import Test from './Test';
 
-export { About }
+export {
+  Test
+}
