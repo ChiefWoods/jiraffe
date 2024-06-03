@@ -9,7 +9,7 @@ const Navbar = ({
   projects = ["Project 1", "Project 2", "Project 3"],
 }) => {
   return (
-    <div className="z-10 flex flex-col h-screen bg-[#0052CC] w-[230px] top-0 left-0 px-0 py-6">
+    <div className="z-10 absolute flex flex-col h-screen bg-[#0052CC] w-[230px] top-0 left-0 px-0 py-6">
       <img src={logo_blue} alt="Logo" className="w-48 mb-4" />
       <ul className="text-white-500 mx-2 pl-0 ml-2">
         {projects.map((project, index) => (
