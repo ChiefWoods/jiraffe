@@ -1,5 +1,5 @@
 import React from 'react'
-import { Work,Lane } from '../components'
+import { Work,Lane,Navbar } from '../components'
 
 const Dashboard = () => {
   const tasks=[
@@ -14,13 +14,24 @@ const Dashboard = () => {
   ]
   return (
     <div>
+      <Navbar/>
+      <div className="z-20 ml-[260px]">
+        <div className=" mx-[20px] mt-5 flex flex-row justify-between">
+        <p className="text-[#0052CC] font-semibold">online-task-mgmt-tool</p>
+        <button className="bg-[#0052CC] text-white">Add Task</button>
+      </div>
       {/* map the task data */}
-      {tasks.map((task,index)=>(
+      {/* {tasks.map((task,index)=>(
         <Work key={index} task_name={task.task_name} task_description={task.task_description} task_status={task.task_status}/>
-      ))}
-      {swimlanes.map((swimlane,index)=>(
+      ))} */}
+      <div className="flex flex-row w-[80%]">
+        {swimlanes.map((swimlane,index)=>(
         <Lane key={index} lane_name={swimlane.lane_name} lane_icon={swimlane.lane_icon} bgcolor={swimlane.bgcolor} strokecolor={swimlane.strokecolor} textcolor={swimlane.textcolor}/>
-      ))}
+        ))}
+      </div>
+      
+      </div>
+      
 
     </div>
     
