@@ -5,7 +5,7 @@ const AddCard = () => {
   const rolesArray = ["Viewer", "Member", "Admin"];
 
   return (
-    <div className='w-screen flex h-screen'>
+    <div className='z-40 relative w-screen flex h-screen'>
       <div className="border-2 mx-auto my-auto bg-white p-6 rounded-md shadow-md flex justify-between w-[600px] h-[360px] max-w-full">
         <div className='flex flex-col'>
           <div className='flex mx-auto'>

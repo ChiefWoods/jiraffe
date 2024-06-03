@@ -8,9 +8,9 @@ import {
 const Test = () => {
   return (
     <div>
-      {/* <Navbar /> */}
+      {/* <AddCard /> */}
+      <Navbar />
       {/* <TaskCard /> */}
-      <AddCard />
     </div>
   )
 }
