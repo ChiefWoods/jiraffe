@@ -1,6 +1,12 @@
+import mongoose from 'mongoose';
 import express from "express";
 import cors from "cors";
-import { client } from "./database.js";
+import dotenv from 'dotenv';
+dotenv.config();
+
+await mongoose.connect(process.env.MONGODB_URI)
+  .then(() => console.log("Connected to database"))
+  .catch(err => console.error(err));
 
 const port = 8000;
 
