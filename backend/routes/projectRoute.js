@@ -45,6 +45,32 @@ router.get('/:project_id', async (request, response) => {
     }
 });
 
+//Route to update project
+router.put('/:project_id', async (request, response) => {
+    try{
+        if(
+            !request.body.name 
+        ){
+            return response.status(400).send({ 
+                message: 'All fields are required' ,
+            });
+        }
+
+        const { project_id } = request.params;
+
+        const result = await Project.findByIdAndUpdate(project_id, request.body);
+
+        if(!result){
+            return response.status(404).json({ message: 'Project not found' });
+        }
+
+        return response.status(200).send({ message: 'Project updated' });
+    }catch(error){
+        console.log(error.message);
+        response.status(500).send({ message: error.message });
+    }
+});
+
 
 
 export default router;
