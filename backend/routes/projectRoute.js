@@ -7,15 +7,15 @@ import { Task } from '../models/taskModel.js';
 const router = express.Router();
 
 //Route for get user's projects
-router.get('/:userId', async (request, response) => {
+router.get('/:user_id', async (request, response) => {
     try{
-        const { userId } = request.params; 
+        const { user_id } = request.params; 
 
         const projects = await Project.find({
             $or: [ 
-              { admin: userId }, 
-              { member: userId }, 
-              { viewer: userId },
+              { admin: user_id }, 
+              { member: user_id }, 
+              { viewer: user_id },
             ],
           })
           .populate('admin') // Populate the admin field
