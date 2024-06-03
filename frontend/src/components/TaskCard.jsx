@@ -20,8 +20,8 @@ const TaskCard = ({
   };
 
   return (
-    <div className='w-screen flex'>
-      <div className="border-2 mx-auto bg-white p-6 rounded-md shadow-md flex justify-between w-[600px] h-[400px] max-w-full">
+    <div className='w-screen flex h-screen'>
+      <div className="border-2 mx-auto my-auto bg-white p-6 rounded-md shadow-md flex justify-between w-[600px] h-[400px] max-w-full">
         {/* Left section */}
         <div className='w-[500px]'>
           {/* Task title and status */}
