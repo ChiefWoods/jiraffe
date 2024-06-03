@@ -1,66 +1,76 @@
-import { Router } from 'express';
-import Task from '../models/taskModel.js';
+import { Router } from "express";
+import Task from "../models/taskModel.js";
 
 const taskRouter = Router();
 
-//get one task by taskid
-taskRouter.get('/:task_id', async (req, res) => {
-    try {
-      const { task_id } = req.params;
+// Get task
+taskRouter.get("/:task_id", async (req, res) => {
+  try {
+    const { task_id: taskId } = req.params;
 
-      const task = await Task.findById(task_id);
-
-      res.status(200).json({ task });
-    } catch (error) {
-      res.status(500).send({ message: error.message });
+    if (!taskId) {
+      return res.status(400).json({ error: "Task ID is required." });
     }
+
+    const task = await Task.findById(taskId);
+
+    if (!task) {
+      return res.status(404).json({ message: "Task not found." });
+    }
+
+    res.status(200).json({ task });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 });
 
-//update task by taskid
-taskRouter.put('/:task_id', async (req, res) => {
-    try {
-      const { task_id } = req.params;
-      const { name, desc, status, asignee } = req.body;
+// Update task
+taskRouter.put("/:task_id", async (req, res) => {
+  try {
+    const { task_id: taskId } = req.params;
+    const { name, desc, status, assignee } = req.body;
 
-      if (!name) {
-        return res.status(400).json({ error: "Name is required." });
-      } else if (!desc) {
-        return res.status(400).json({ error: "Description is required." });
-      } else if (!status) {
-        return res.status(400).json({ error: "Status is required." });
-      }
-
-      const result = await Task.findByIdAndUpdate(task_id, req.body);
-
-      if (!result) {
-        return res.status(404).json({ message: 'Task not found.' });
-      }
-
-      return res.status(200).send({ message: 'Task updated.' });
-    } catch (error) {
-      res.status(500).send({ message: error.message });
+    if (!taskId) {
+      return res.status(400).json({ error: "Task ID is required." });
     }
+
+    if (!name || !desc || !status || !assignee) {
+      return res
+        .status(400)
+        .json({ message: "At least one field is required." });
+    }
+
+    const result = await Task.findByIdAndUpdate(taskId, req.body);
+
+    if (!result) {
+      return res.status(404).json({ message: "Task not found." });
+    }
+
+    res.status(200).json({ message: "Task updated." });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 });
 
-//delete task by taskid
-taskRouter.delete('/:task_id', async (request, response) => {
-    try{
-        const { task_id } = request.params;
+// Delete task
+taskRouter.delete("/:task_id", async (req, res) => {
+  try {
+    const { task_id: taskId } = req.params;
 
-        const result = await Task.findByIdAndDelete(task_id);
-
-        if(!result){
-            return response.status(404).json({ message: 'Task not found' });
-        }
-
-        return response.status(200).send({ message: 'Task deleted' });
-        
-    }catch(error){
-        console.log(error.message);
-        response.status(500).send({ message: error.message });
+    if (!taskId) {
+      return res.status(400).json({ error: "Task ID is required." });
     }
+
+    const result = await Task.findByIdAndDelete(task_id);
+
+    if (!result) {
+      return res.status(404).json({ message: "Task not found." });
+    }
+
+    res.status(200).json({ message: "Task deleted." });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 });
-
-
 
 export default taskRouter;

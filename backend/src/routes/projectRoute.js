@@ -1,10 +1,11 @@
-import { Router } from 'express';
-import Project from '../models/projectModel.js';
-import Task from '../models/taskModel.js';
+import { Router } from "express";
+import Project from "../models/projectModel.js";
+import Task from "../models/taskModel.js";
 
 const projectRouter = Router();
 
-projectRouter.get('/:project_id', async (req, res) => {
+// Get project
+projectRouter.get("/:project_id", async (req, res) => {
   try {
     const { project_id: projectId } = req.params;
 
@@ -20,13 +21,14 @@ projectRouter.get('/:project_id', async (req, res) => {
   }
 });
 
-projectRouter.put('/:project_id', async (req, res) => {
+// Update project
+projectRouter.put("/:project_id", async (req, res) => {
   try {
     const { project_id: projectId } = req.params;
     const { name } = req.body;
 
     if (!name) {
-      return res.status(400).json({ message: 'All fields are required' });
+      return res.status(400).json({ message: "All fields are required" });
     }
 
     if (!projectId) {
@@ -36,18 +38,20 @@ projectRouter.put('/:project_id', async (req, res) => {
     const result = await Project.findByIdAndUpdate(projectId, req.body);
 
     if (!result) {
-      return res.status(404).json({ message: 'Project not found.' });
+      return res.status(404).json({ message: "Project not found." });
     }
 
-    res.status(200).json({ message: 'Project updated.' });
+    res.status(200).json({ message: "Project updated." });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
-projectRouter.get('/:project_id/task', async (req, res) => {
+
+// Get all tasks from project
+projectRouter.get("/:project_id/task", async (req, res) => {
   try {
     const { project_id: projectId } = req.params;
-    
+
     if (!projectId) {
       return res.status(400).json({ error: "Project ID is required." });
     }
@@ -55,7 +59,7 @@ projectRouter.get('/:project_id/task', async (req, res) => {
     const tasks = await Task.find({ project: projectId });
 
     if (!tasks) {
-      return res.status(404).json({ message: 'No tasks found.' });
+      return res.status(404).json({ message: "No tasks found." });
     }
 
     res.status(200).json({ tasks });
@@ -64,7 +68,8 @@ projectRouter.get('/:project_id/task', async (req, res) => {
   }
 });
 
-projectRouter.post('/:project_id/task', async (req, res) => {
+// Add task to project
+projectRouter.post("/:project_id/task", async (req, res) => {
   try {
     const { project_id: projectId } = req.params;
     const { name, desc, status, assignee } = req.body;
@@ -80,7 +85,7 @@ projectRouter.post('/:project_id/task', async (req, res) => {
     const project = await Project.findById(projectId);
 
     if (!project) {
-      return res.status(404).json({ message: 'Project not found.' });
+      return res.status(404).json({ message: "Project not found." });
     }
 
     const task = await Task.create({
@@ -88,12 +93,12 @@ projectRouter.post('/:project_id/task', async (req, res) => {
       name,
       desc,
       status,
-      assignee
+      assignee,
     });
 
     await task.save();
 
-    res.status(201).json({ message: 'Task added successfully.' });
+    res.status(201).json({ message: "Task added successfully." });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

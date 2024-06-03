@@ -6,7 +6,7 @@ import Project from "../models/projectModel.js";
 
 const authRouter = Router();
 
-function verifyToken(req, res, next) {
+export function verifyToken(req, res, next) {
   const authHeader = req.headers.authorization;
 
   if (!authHeader) {
@@ -25,6 +25,7 @@ function verifyToken(req, res, next) {
   });
 }
 
+// Registers new user
 authRouter.post("/register", async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -60,6 +61,7 @@ authRouter.post("/register", async (req, res) => {
   }
 });
 
+// Login user
 authRouter.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;

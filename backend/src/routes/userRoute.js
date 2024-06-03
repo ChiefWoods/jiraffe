@@ -1,7 +1,9 @@
 import { Router } from "express";
+import Project from "../models/projectModel.js";
 
 const userRouter = Router();
 
+// Get user
 userRouter.get("/:user_id", async (req, res) => {
   try {
     const { user_id: userId } = req.params;
