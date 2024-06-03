@@ -9,9 +9,9 @@ const Navbar = ({
   projects = ["Project 1", "Project 2", "Project 3"],
 }) => {
   return (
-    <div className="z-10 flex flex-col h-screen bg-[#0052CC] fixed top-0 left-0 px-4 py-6">
+    <div className="z-10 flex flex-col h-screen bg-[#0052CC] w-[230px] top-0 left-0 px-0 py-6">
       <img src={logo_blue} alt="Logo" className="w-48 mb-4" />
-      <ul className="text-white-500 mx-2">
+      <ul className="text-white-500 mx-2 pl-0 ml-2">
         {projects.map((project, index) => (
           <li key={index} className={`mb-2 bg-[#0052CC] text-white`}>
             <button className={`block w-full text-left bg-[#0052CC] ${project === current_project ? 'font-extrabold' : 'font-light'}`}>
@@ -21,7 +21,7 @@ const Navbar = ({
         ))}
       </ul>
       <div className='flex-grow flex flex-col justify-end mb-6'>
-        <ul className="flex flex-col space-y-6">
+        <ul className="flex flex-col space-y-6 ml-6">
           <li className='flex items-center mr-2'>
             <span>
               <MdDashboard className='text-white text-2xl mx-2'/>
