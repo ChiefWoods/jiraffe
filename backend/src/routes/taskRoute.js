@@ -20,7 +20,7 @@ taskRouter.get('/:task_id', async (req, res) => {
 taskRouter.put('/:task_id', async (req, res) => {
     try {
       const { task_id } = req.params;
-      const { name, desc, status } = req.body;
+      const { name, desc, status, asignee } = req.body;
 
       if (!name) {
         return res.status(400).json({ error: "Name is required." });

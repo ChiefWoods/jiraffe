@@ -42,7 +42,7 @@ projectRouter.post('/:project_id/task', async (req, res) => {
   try {
     const { project_id } = req.params;
 
-    const { name, desc} = req.body;
+    const { name, desc, status, asignee} = req.body;
 
     if (!name) {
       return res.status(400).json({ error: "Name is required." });
@@ -61,6 +61,8 @@ projectRouter.post('/:project_id/task', async (req, res) => {
       project_id,
       name,
       desc,
+      status,
+      asignee
     })
 
     await task.save();
