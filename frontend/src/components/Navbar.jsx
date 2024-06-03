@@ -3,15 +3,20 @@ import { logo_blue } from '../assets';
 import { MdDashboard } from "react-icons/md";
 import { IoIosSettings } from "react-icons/io";
 
-const Navbar = () => {
+const Navbar = ({
+  current_project = "Project 1",
+  projects = ["Project 1", "Project 2", "Project 3"],
+}) => {
   return (
     <div className="flex flex-col h-screen bg-[#0052CC] fixed top-0 left-0 px-4 py-6">
       <img src={logo_blue} alt="Logo" className="w-48 mb-4" />
-      <select className="text-white bg-[#0052CC] p-2 mb-4">
-        <option value="project1">Project 1</option>
-        <option value="project2">Project 2</option>
-        <option value="project3">Project 3</option>
-      </select>
+      <ul className="text-white-500 mx-2">
+        {projects.map((project, index) => (
+          <li key={index} className={`mb-4 ${project === current_project ? 'font-extrabold' : 'font-light'}`}>
+            {project}
+          </li>
+        ))}
+      </ul>
       <div className='flex-grow flex flex-col justify-end mb-6'>
         <ul className="flex flex-col space-y-6">
           <li className='flex items-center mr-2'>
