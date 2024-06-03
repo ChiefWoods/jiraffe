@@ -1,13 +1,14 @@
 import express from 'express';
-import { Project } from '../models/projectModel.js';
 import { User } from '../models/userModel.js';
-import { Task } from '../models/taskModel.js';
+import { Project } from '../models/projectModel.js';
+//import { router } from '../src/server.js';
 
 const router = express.Router();
 
 
 //Route for add a new user
 router.post('/register', async (request,response) => {
+    console.log("test")
     try{
         if(
             !request.body.email ||
@@ -26,7 +27,17 @@ router.post('/register', async (request,response) => {
 
         const user = await User.create(newUser);
 
-        return response.status(201).send(user);
+        const defaultProject = new Project({
+            name: `${user.name}'s Project`, // Give it a name using the user's name
+            admin: user._id, // Set the user as the admin
+            member: [], // Initialize with an empty array
+            viewer: [],
+        });
+
+        await defaultProject.save();
+
+        // return response.status(201).send(user);
+        return response.status(201).send({ message: 'User created successfully' });
     }catch(error){
         console.log(error.message);
         response.status(500).send({ message: error.message });
@@ -44,7 +55,7 @@ router.post('/login', async (request,response) => {
                 message: 'All fields are required' ,
             });
         }
-        const user = await User.findOne({ email });
+        const user = await User.findOne({email: request.body.email});
         if (!user) {
             return response.status(401).send({ 
                 message: 'Invalid email or password' 
