@@ -1,11 +1,11 @@
 import React from 'react';
-import { Navbar, TaskCard } from '../components';
+import { Navbar, TaskCard,Lane,Work } from '../components';
 
 const Test = () => {
   return (
     <div>
       {/* <Navbar /> */}
-      <TaskCard />
+      <Work />
     </div>
   )
 }
