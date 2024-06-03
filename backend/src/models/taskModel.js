@@ -6,7 +6,7 @@ const taskSchema = mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       required: true,
       unique: true,
-      ref: 'Project',
+      ref: "Project",
     },
     name: {
       type: String,
@@ -15,12 +15,21 @@ const taskSchema = mongoose.Schema(
     desc: {
       type: String,
     },
+    status: {
+      type: String,
+      enum: ['TO DO', 'IN PROGRESS', 'DONE'],
+      default: 'TO DO',
+    },
+    asignee: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+    }
   },
   {
     timestamps: true,
-  }
+  },
 );
 
-const Task = mongoose.model('Task', taskSchema);
+const Task = mongoose.model("Task", taskSchema);
 
 export default Task;

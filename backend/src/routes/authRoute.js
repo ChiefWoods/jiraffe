@@ -23,9 +23,9 @@ function verifyToken(req, res, next) {
     req.user = decoded;
     next();
   });
-};
+}
 
-authRouter.post('/register', async (req, res) => {
+authRouter.post("/register", async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
@@ -42,25 +42,25 @@ authRouter.post('/register', async (req, res) => {
     const user = await User.create({
       name,
       email,
-      password: hashedPassword
-    })
+      password: hashedPassword,
+    });
 
     const project = await Project.create({
       name: `${user.name}'s Project`,
       admin: user._id,
       members: [],
-      viewers: []
-    })
+      viewers: [],
+    });
 
     await project.save();
 
     res.status(201).json({ message: "User registered successfully." });
   } catch (err) {
-    res.status(500).json({ error: "Internal server error." });
+    res.status(500).json({ error: err.message });
   }
 });
 
-authRouter.post('/login', async (req, res) => {
+authRouter.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -83,12 +83,12 @@ authRouter.post('/login', async (req, res) => {
     }
 
     const token = jwt.sign({ user_id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "7d"
+      expiresIn: "7d",
     });
 
     res.status(200).json({ token });
   } catch (err) {
-    res.status(500).json({ error: "Internal server error." });
+    res.status(500).json({ error: err.message });
   }
 });
 

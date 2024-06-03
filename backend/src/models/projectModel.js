@@ -9,26 +9,26 @@ const projectSchema = mongoose.Schema(
     admin: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
-      ref: 'User'
+      ref: "User",
     },
     member: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
-      }
+        ref: "User",
+      },
     ],
     viewer: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
-      }
+        ref: "User",
+      },
     ],
   },
   {
     timestamps: true,
-  }
+  },
 );
 
-const Project = mongoose.model('Project', projectSchema);
+const Project = mongoose.model("Project", projectSchema);
 
 export default Project;

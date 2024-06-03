@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import Project from '../models/projectModel.js';
+import Task from '../models/taskModel.js';
 
 const projectRouter = Router();
 
@@ -15,84 +16,87 @@ projectRouter.get('/:project_id', async (req, res) => {
 
     res.status(200).json({ project });
   } catch (err) {
-    res.status(500).send({ message: err.message });
+    res.status(500).send({ message: 'Internal server error.' });
   }
 });
 
 projectRouter.put('/:project_id', async (req, res) => {
   try {
-    const { name } = req.body;
     const { project_id: projectId } = req.params;
+    const { name } = req.body;
 
     if (!name) {
-      return res.status(400).send({ message: "All fields are required" });
+      return res.status(400).send({ message: 'All fields are required' });
     }
 
     if (!projectId) {
       return res.status(400).send({ error: "Project ID is required." });
     }
 
-    const result = await Project.findByIdAndUpdate(projectId, { name });
+    const result = await Project.findByIdAndUpdate(projectId, req.body);
 
     if (!result) {
-      return res.status(404).json({ message: "Project not found." });
+      return res.status(404).json({ message: 'Project not found.' });
     }
 
-    return res.status(200).send({ message: "Project updated." });
-  } catch (err) {
-    res.status(500).send({ message: err.message });
+    res.status(200).send({ message: 'Project updated.' });
+  } catch (error) {
+    res.status(500).send({ message: 'Internal server error.' });
   }
 });
 
-projectRouter.post("/:project_id/people", async (req, res) => {
+//Route to add task
+projectRouter.post('/:project_id/task', async (req, res) => {
   try {
     const { project_id: projectId } = req.params;
-    const { user_id: userId } = req.body;
+    const { name, desc, status, assignee } = req.body;
 
     if (!projectId) {
       return res.status(400).send({ error: "Project ID is required." });
+    } else if (!name) {
+      return res.status(400).json({ error: "Name is required." });
+    } else if (!desc) {
+      return res.status(400).json({ error: "Description is required." });
     }
 
     const project = await Project.findById(projectId);
 
     if (!project) {
-      return res.status(404).json({ error: "Project not found." });
+      return res.status(404).send({ message: 'Project not found.' });
     }
 
-    const { member, viewer } = project;
-    let result;
+    const task = await Task.create({
+      project_id: projectId,
+      name,
+      desc,
+      status,
+      assignee
+    });
 
-    if (viewer.includes(userId)) {
-      result = await Project.findByIdAndUpdate(projectId, {
-        $pull: {
-          viewer: userId,
-        },
-        $push: {
-          member: userId,
-        },
-      });
-    } else if (member.includes(userId)) {
-      result = await Project.findByIdAndUpdate(projectId, {
-        $pull: {
-          member: userId,
-        },
-        $push: {
-          viewer: userId,
-        },
-      });
-    } else {
-      result = await Project.findByIdAndUpdate(projectId, {
-        $push: {
-          viewer: userId,
-        },
-      });
+    await task.save();
+
+    res.status(201).send({ message: 'Task added successfully.' });
+  } catch (error) {
+    res.status(500).send({ message: error.message });
+  }
+});
+
+//Route to get all tasks of a project
+projectRouter.get('/:project_id/task', async (req, res) => {
+  try {
+    const { project_id: projectId } = req.params;
+    
+    if (!projectId) {
+      return res.status(400).send({ error: "Project ID is required." });
     }
 
-    if (!result) {
-      return res.status(404).json({ message: "Project not found." });
+    const tasks = await Task.find({ project: projectId });
+
+    if (!tasks) {
+      return res.status(404).send({ message: 'No tasks found.' });
     }
 
-    res.status(200).send({ message: "User granted access to project." });
+    res.status(200).json({ tasks });
   } catch (err) {
     res.status(500).send({ message: err.message });
   }
