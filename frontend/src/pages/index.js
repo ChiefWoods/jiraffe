@@ -1,3 +1,3 @@
-import About from './About';
-
-export { About }
+import Login from './Login';
+import Register from './Register'
+export { Login,Register }

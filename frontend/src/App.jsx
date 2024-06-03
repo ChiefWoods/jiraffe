@@ -3,14 +3,15 @@ import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
 import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
-import { About } from './pages';
+import { Login,Register } from './pages';
 
 const App = () => {
   return (
     <>
       <BrowserRouter>
         <Routes>
-          <Route path="/about" element={<About />} />
+          <Route path="/login" element={<Login/>} />
+          <Route path="/register" element={<Register/>}/>
         </Routes>
       </BrowserRouter>
     </>
