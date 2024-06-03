@@ -13,4 +13,4 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use('/auth', authenticationRoute);
 
-app.listen(port, () => console.log(`Listening on port ${port}`));
+

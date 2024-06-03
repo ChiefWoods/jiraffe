@@ -2,28 +2,35 @@ import express from 'express';
 import { Project } from '../models/projectModel.js';
 import { User } from '../models/userModel.js';
 import { Task } from '../models/taskModel.js';
-import { app } from '../src/server.js';
+
+
+const router = express.Router();
 
 //Route for get user's projects
-app.get('/:user_id', async (request, response) => {
+router.get('/:userId', async (request, response) => {
     try{
-
-        const { id } = request.params;
+        const { userId } = request.params; 
 
         const projects = await Project.find({
-            $or: [ // Use $or to search in any of the fields
-              { admin: user._id },
-              { member: user._id },
-              { viewer: user._id },
+            $or: [ 
+              { admin: userId }, 
+              { member: userId }, 
+              { viewer: userId },
             ],
-          });
+          })
+          .populate('admin') // Populate the admin field
+          .populate('member') // Populate the member field
+          .populate('viewer'); // Populate the viewer field 
+
+        // Send the populated projects in the response
+        response.status(200).send(projects); 
+
     }catch(error){
         console.log(error.message);
         response.status(500).send({ message: error.message });
     }
-})
+});
 
 
 
-
-export default app;
+export default router;
