@@ -6,7 +6,9 @@ import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
 import {
   Test,
   Login, 
-  Register
+  Register,
+  Dashboard,
+  Settings
 } from './pages'
 
 const App = () => {
@@ -17,6 +19,8 @@ const App = () => {
           <Route path="/test" element={<Test />} />
           <Route path="/login" element={<Login/>} />
           <Route path="/register" element={<Register/>}/>
+          <Route path='/dashboard' element={<Dashboard/>}/>
+          <Route path="/settings" element={<Settings/>}/>
         </Routes>
       </BrowserRouter>
     </>

@@ -7,11 +7,7 @@ import {
 
 const Test = () => {
   return (
-    <div>
-      {/* <AddCard /> */}
-      <Navbar />
-      {/* <TaskCard /> */}
-    </div>
+    <Navbar />
   )
 }
 
