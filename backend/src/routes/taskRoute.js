@@ -34,10 +34,14 @@ taskRouter.put("/:task_id", async (req, res) => {
       return res.status(400).json({ error: "Task ID is required." });
     }
 
-    if (!name || !desc || !status || !assignee) {
+    if (!name && !desc && !status && !assignee) {
       return res
         .status(400)
         .json({ message: "At least one field is required." });
+    }
+
+    if (status && status !== "TO DO" && status !== "IN PROGRESS" && status !== "DONE") {
+      return res.status(400).json({ message: 'Only status of "TO DO", "IN PROGRESS" and "DONE" are allowed.' });
     }
 
     const result = await Task.findByIdAndUpdate(taskId, req.body);
@@ -61,7 +65,7 @@ taskRouter.delete("/:task_id", async (req, res) => {
       return res.status(400).json({ error: "Task ID is required." });
     }
 
-    const result = await Task.findByIdAndDelete(task_id);
+    const result = await Task.findByIdAndDelete(taskId);
 
     if (!result) {
       return res.status(404).json({ message: "Task not found." });
