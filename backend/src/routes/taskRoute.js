@@ -9,7 +9,7 @@ taskRouter.get("/:task_id", async (req, res) => {
     const { task_id: taskId } = req.params;
 
     if (!taskId) {
-      return res.status(400).json({ error: "Task ID is required." });
+      return res.status(400).json({ message: "Task ID is required." });
     }
 
     const task = await Task.findById(taskId);
@@ -50,7 +50,7 @@ taskRouter.put("/:task_id", async (req, res) => {
       return res.status(404).json({ message: "Task not found." });
     }
 
-    res.status(200).json({ message: "Task updated." });
+    res.status(200).json({ message: `Task ${taskId} updated.` });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -62,7 +62,7 @@ taskRouter.delete("/:task_id", async (req, res) => {
     const { task_id: taskId } = req.params;
 
     if (!taskId) {
-      return res.status(400).json({ error: "Task ID is required." });
+      return res.status(400).json({ message: "Task ID is required." });
     }
 
     const result = await Task.findByIdAndDelete(taskId);
@@ -71,7 +71,7 @@ taskRouter.delete("/:task_id", async (req, res) => {
       return res.status(404).json({ message: "Task not found." });
     }
 
-    res.status(200).json({ message: "Task deleted." });
+    res.status(200).json({ message: `Task ${taskId} deleted.` });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

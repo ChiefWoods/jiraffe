@@ -3,13 +3,13 @@ import Project from "../models/projectModel.js";
 
 const userRouter = Router();
 
-// Get user
+// Get user's projects
 userRouter.get("/:user_id", async (req, res) => {
   try {
     const { user_id: userId } = req.params;
 
     if (!userId) {
-      return res.status(400).send({ error: "User ID is required." });
+      return res.status(400).send({ message: "User ID is required." });
     }
 
     const projects = await Project.find({
