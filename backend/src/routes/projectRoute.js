@@ -56,7 +56,7 @@ projectRouter.get("/:project_id/task", async (req, res) => {
       return res.status(400).json({ error: "Project ID is required." });
     }
 
-    const tasks = await Task.find({ project: projectId });
+    const tasks = await Task.find({ project_id: projectId });
 
     if (!tasks) {
       return res.status(404).json({ message: "No tasks found." });
