@@ -1,5 +1,6 @@
 import React from 'react'
 import { Work,Lane,Navbar } from '../components'
+import { IoIosSettings } from "react-icons/io";
 
 const Dashboard = () => {
   const tasks=[
@@ -13,12 +14,16 @@ const Dashboard = () => {
     {lane_name:'DONE',lane_icon:'check',bgcolor:'#E9FFEA',strokecolor:'#AAF0C9',textcolor:'#3A5F3A'}
   ]
   return (
-    <div>
+    <div className='flex flex-row'>
       <Navbar/>
-      <div className="z-20 ml-[260px]">
+      <div className=" w-[100%] px-10 py-5">
         <div className=" mx-[20px] mt-5 flex flex-row justify-between">
         <p className="text-[#0052CC] font-semibold">online-task-mgmt-tool</p>
-        <button className="bg-[#0052CC] text-white">Add Task</button>
+        <div className='flex flex-row'>
+          <button className="bg-slate-400 text-white mr-5 flex flex-row"><IoIosSettings className='text-white text-2xl mr-1'/>Settings</button>
+          <button className="bg-[#0052CC] text-white">Add Task</button>
+        </div>
+        
       </div>
       {/* map the task data */}
       {/* {tasks.map((task,index)=>(
