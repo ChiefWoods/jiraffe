@@ -1,13 +1,13 @@
 import Navbar from './Navbar';
 import TaskCard from './TaskCard';
 import AddCard from './AddCard';
-import Lane from './lane'
-import Work from './work'
+import Work from './work';
+import Lane from './lane';
 
 export {
   Navbar,
   TaskCard,
   AddCard,
-  Lane,
-  Work
+  Work,
+  Lane
 }

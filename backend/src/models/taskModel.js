@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const taskSchema = mongoose.Schema(
   {
     project_id: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: String,
       required: true,
       unique: true,
       ref: "Project",
@@ -21,7 +21,7 @@ const taskSchema = mongoose.Schema(
       default: "TO DO",
     },
     assignee: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: String,
       ref: "User",
     },
   },

@@ -3,10 +3,7 @@ import { Navbar, TaskCard } from '../components';
 
 const Test = () => {
   return (
-    <div>
-      {/* <Navbar /> */}
-      <TaskCard />
-    </div>
+    <Navbar />
   )
 }
 

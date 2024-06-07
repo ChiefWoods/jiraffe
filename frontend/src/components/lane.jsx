@@ -32,24 +32,25 @@ let Icon;
   const style={
     borderColor:strokecolor,
     backgroundColor:bgcolor,
-    color:textcolor
+    color:textcolor,
+    '--hover-bgcolor': bgcolor,
   }
 
   const laneTasks=tasks.filter(task=>task.task_status===lane_name);
 
   return (
-    <div className=''>
-          <div className={`border-solid border-2 rounded-2xl mt-2 ml-2 p-5  `} style={style}>
+    <div className='mx-5 w-[33%]'>
+          <div className={`border-solid border-2 rounded-2xl  p-5  `} style={style}>
         <div className=''>
           <div className='flex flex-row'>
             <p className='mr-3 text-[24px] '>{Icon && <Icon/>}</p>
             <p className='mb-4 text-[20px] font-medium'>{lane_name}</p>
           </div>
           {laneTasks.map((task,index)=>(
-            <div key={index} className='mb-2 border-solid border-2 rounded-2xl mt-2 ml-2 p-5  bg-white min-w-[300px]' style={{borderColor:strokecolor}}>
+            <div key={index} className='mb-2 border-solid border-2 rounded-2xl mt-2 ml-2 p-5  bg-white min-w-[300px] cursor-pointer transition-transform duration-300 hover:scale-105 ' style={{borderColor:strokecolor}}>
               <div className='flex flex-row justify-between'>
                 <p className="font-semibold">{task.task_name}</p>
-                <p className='text-[#D70000] text-[24px]  cursor-pointer'><GoTrash /></p>
+                <p className='text-slate-400 hover:text-[#D70000] text-[24px] transition-transform duration-300 hover:scale-105  cursor-pointer'><GoTrash /></p>
               </div>
               
               <p className="text-sm">{task.task_description}</p>
@@ -59,7 +60,7 @@ let Icon;
       </div>
 
       <div className="  justify-center text-center content-center mt-4 ">
-        <div className='bg-[#0052CC] rounded-3xl w-[40px] h-[40px] mx-auto flex text-center text-white text-[35px] justify-center items-center hover:bg-blue-600 hover:cursor-pointer '>
+        <div className='bg-[#0052CC] rounded-3xl w-[40px] h-[40px] mx-auto flex text-center text-white text-[35px] justify-center items-center hover:bg-blue-600 hover:cursor-pointer transition-transform duration-300 hover:scale-110 '>
           +
         </div>
       </div>

@@ -7,7 +7,8 @@ import {
   Test,
   Login, 
   Register,
-  Dashboard
+  Dashboard,
+  Settings
 } from './pages'
 
 const App = () => {
@@ -19,6 +20,7 @@ const App = () => {
           <Route path="/login" element={<Login/>} />
           <Route path="/register" element={<Register/>}/>
           <Route path='/dashboard' element={<Dashboard/>}/>
+          <Route path="/settings" element={<Settings/>}/>
         </Routes>
       </BrowserRouter>
     </>
