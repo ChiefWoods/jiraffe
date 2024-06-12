@@ -3,11 +3,15 @@ import {
   Navbar,
   TaskCard,
   AddCard,
+  EditUserCard
 } from '../components';
 
 const Test = () => {
   return (
-    <Navbar />
+    <div className='flex'>
+      <Navbar />
+      <EditUserCard />
+    </div>
   )
 }
 
