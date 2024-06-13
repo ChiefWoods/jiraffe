@@ -41,8 +41,12 @@ projectRouter.put('/:project_id', async (req, res) => {
 projectRouter.post('/:project_id/task', async (req, res) => {
   try {
     const { project_id } = req.params;
+    
+    const project = await Project.findById(project_id);
+    
+    const asignee = project.admin;
 
-    const { name, desc, status, asignee} = req.body;
+    const { name, desc, status} = req.body;
 
     if (!name) {
       return res.status(400).json({ error: "Name is required." });
@@ -50,7 +54,6 @@ projectRouter.post('/:project_id/task', async (req, res) => {
       return res.status(400).json({ error: "Description is required." });
     }
 
-    const project = await Project.findById(project_id);
 
     if (!project) {
       return res.status(404).send({ message: 'Project not found' });
