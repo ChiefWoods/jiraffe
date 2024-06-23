@@ -2,7 +2,7 @@ import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
-import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Outlet,useParams } from "react-router-dom";
 import {
   Test,
   Login, 
@@ -10,6 +10,7 @@ import {
   Dashboard,
   Settings
 } from './pages'
+
 
 const App = () => {
   return (

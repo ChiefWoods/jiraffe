@@ -1,4 +1,5 @@
 import { Router } from "express";
+import mongoose from "mongoose";
 import Project from "../models/projectModel.js";
 import Task from "../models/taskModel.js";
 
@@ -20,6 +21,28 @@ projectRouter.get("/:project_id", async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
+
+//Get projectid via userid
+projectRouter.get("/user/:user_id",async(req,res)=>{
+  try{
+    const{user_id}=req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(user_id)) {
+      return res.status(400).json({ error: "Valid User ID is required." });
+    }
+
+    console.log(`Fetching project for userID:${user_id}`);
+
+    const project=await Project.findOne({admin:user_id});
+    if(!project){
+      console.error('Project not found');
+      return res.status(404).json({error:'User not found.'});
+    }
+    res.status(200).json({projectID:project._id,projectName:project.name});
+  }catch(err){
+    res.status(500).json({message:err.message});
+  }
+})
 
 // Update project
 projectRouter.put("/:project_id", async (req, res) => {

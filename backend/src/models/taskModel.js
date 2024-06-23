@@ -5,7 +5,6 @@ const taskSchema = mongoose.Schema(
     project_id: {
       type: String,
       required: true,
-      unique: true,
       ref: "Project",
     },
     name: {
