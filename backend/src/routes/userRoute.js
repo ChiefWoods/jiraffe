@@ -4,21 +4,21 @@ import Project from "../models/projectModel.js";
 import User from "../models/userModel.js";
 const userRouter = Router();
 
-// Get user
+// Get user's projects
 userRouter.get("/:user_id", async (req, res) => {
   try {
-    const { user_id: userId } = req.params;
+    const { user_id } = req.params;
 
-    if (!userId) {
-      return res.status(400).send({ error: "User ID is required." });
+    if (!user_id) {
+      return res.status(400).send({ message: "User ID is required." });
     }
 
     const projects = await Project.find({
-      $or: [{ admin: userId }, { member: userId }, { viewer: userId }],
+      $or: [{ admin: user_id }, { members: user_id }, { viewers: user_id }],
     })
       .populate("admin")
-      .populate("member")
-      .populate("viewer");
+      .populate("members")
+      .populate("viewers");
 
     res.status(200).json({ projects });
   } catch (err) {

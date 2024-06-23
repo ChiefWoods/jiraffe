@@ -11,13 +11,13 @@ const projectSchema = mongoose.Schema(
       required: true,
       ref: "User",
     },
-    member: [
+    members: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
       },
     ],
-    viewer: [
+    viewers: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",

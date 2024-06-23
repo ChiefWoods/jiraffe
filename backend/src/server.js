@@ -16,9 +16,9 @@ await mongoose
   .then(() => console.log("Connected to database"))
   .catch((err) => console.error(err));
 
-const port = 8000;
+const port = process.env.VITE_PORT || 8000;
 
-export const app = express();
+const app = express();
 
 app.use(cors());
 app.use(express.json());
