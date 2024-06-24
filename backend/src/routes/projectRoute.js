@@ -155,7 +155,7 @@ projectRouter
   .post(async (req, res) => {
     try {
       const { project_id } = req.params;
-      const { user_id } = req.body;
+      const { user_id, user_role } = req.body;
 
       const project = await Project.findById(project_id);
 
@@ -163,7 +163,11 @@ projectRouter
         return res.status(404).json({ message: "Project not found." });
       }
 
-      project.members.push(user_id);
+      if (user_role === "member") {
+        project.members.push(user_id);
+      } else if (user_role === "viewer") {
+        project.viewers.push(user_id);
+      }
 
       await project.save();
 

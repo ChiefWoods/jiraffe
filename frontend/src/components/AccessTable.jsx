@@ -1,4 +1,7 @@
 import React, { useEffect, useState } from 'react';
+import {
+  AddCard,
+} from '../components';
 
 // Sample data
 const sampleUsers = [
@@ -116,6 +119,11 @@ async function parseUserDetails(project, token) {
 
 const AccessTable = () => {
   const [users, setUsers] = useState([]);
+  const [isAddCardOpen, setIsAddCardOpen] = useState(false);
+
+  const toggleAddCard = () => {
+    setIsAddCardOpen(!isAddCardOpen);
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -145,7 +153,7 @@ const AccessTable = () => {
     <div className='mt-12 flex flex-col'>
       <div className='flex mt-8 ml-2 justify-between w-[930px]'>
         <p className='font-bold text-3xl text-blue-700 mb-8'>Access</p>
-        <button className='bg-blue-700 text-white w-[100px] p-0 rounded h-[30px] text-sm'>Add User</button>
+        <button className='bg-blue-700 text-white w-[100px] p-0 rounded h-[30px] text-sm' onClick={toggleAddCard}>Add User</button>
       </div>
       <table className='w-[1210px] table-auto border-collapse'>
         <thead>
@@ -172,6 +180,8 @@ const AccessTable = () => {
           ))}
         </tbody>
       </table>
+      {/* Add Card */}
+      <AddCard isOpen={isAddCardOpen} onClose={toggleAddCard} />
     </div>
   );
 };
