@@ -4,6 +4,7 @@ import AddCard from './AddCard';
 import Work from './work';
 import Lane from './lane';
 import EditUserCard from './EditUserCard';
+import UpdateProject from './UpdateProject';
 
 export {
   Navbar,
@@ -12,4 +13,5 @@ export {
   Work,
   Lane,
   EditUserCard,
+  UpdateProject
 }
