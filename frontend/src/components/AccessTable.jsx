@@ -120,6 +120,7 @@ async function parseUserDetails(project, token) {
 const AccessTable = () => {
   const [users, setUsers] = useState([]);
   const [isAddCardOpen, setIsAddCardOpen] = useState(false);
+  const [projectId, setProjectId] = useState(null);
 
   const toggleAddCard = () => {
     setIsAddCardOpen(!isAddCardOpen);
@@ -134,6 +135,7 @@ const AccessTable = () => {
       if (token && userID) {
         try {
           const data = await fetchProjectID(token, userID);
+          setProjectId(data.projectID);  // Save project ID
           const project = await fetchProject(token, data.projectID);
           const allUsers = await parseUserDetails(project, token);
           setUsers(allUsers);
@@ -155,7 +157,7 @@ const AccessTable = () => {
         <p className='font-bold text-3xl text-blue-700 mb-8'>Access</p>
         <button className='bg-blue-700 text-white w-[100px] p-0 rounded h-[30px] text-sm' onClick={toggleAddCard}>Add User</button>
       </div>
-      <table className='w-[1210px] table-auto border-collapse'>
+      <table className='w-[1110px] table-auto border-collapse'>
         <thead>
           <tr>
             <th className='text-left'>Name</th>
@@ -181,7 +183,7 @@ const AccessTable = () => {
         </tbody>
       </table>
       {/* Add Card */}
-      <AddCard isOpen={isAddCardOpen} onClose={toggleAddCard} />
+      <AddCard isOpen={isAddCardOpen} onClose={toggleAddCard} projectId={projectId} />
     </div>
   );
 };

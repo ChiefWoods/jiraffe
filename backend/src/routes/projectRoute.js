@@ -148,14 +148,12 @@ projectRouter
     }
   });
 
+// Add user to project
 projectRouter
-  .route("/:project_id/user")
-  .all(checkProjectIdParam, checkUserIdBody)
-  // Add user to project
+  .route("/addusertoproject")
   .post(async (req, res) => {
     try {
-      const { project_id } = req.params;
-      const { user_id, user_role } = req.body;
+      const { project_id, user_id, user_role } = req.body;
 
       const project = await Project.findById(project_id);
 
@@ -178,6 +176,10 @@ projectRouter
       res.status(500).json({ message: err.message });
     }
   })
+
+projectRouter
+  .route("/:project_id/user")
+  .all(checkProjectIdParam, checkUserIdBody)
   // Update user in project
   .put(async (req, res) => {
     try {
