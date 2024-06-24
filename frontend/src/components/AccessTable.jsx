@@ -89,53 +89,56 @@ async function getUserDetails(token, userID) {
   }
 }
 
+async function parseUserDetails(project, token) {
+  const { admin, members, viewers } = project;
+  const adminUser = [getUserDetails(token, admin)];
+  const memberUsers = members.map((member) => getUserDetails(token, member));
+  const viewerUsers = viewers.map((viewer) => getUserDetails(token, viewer));
+
+  const userDetails = await Promise.all([
+    ...adminUser,
+    ...memberUsers,
+    ...viewerUsers
+  ]);
+
+  const adminList = userDetails.slice(0, adminUser.length);
+  const memberList = userDetails.slice(adminUser.length, adminUser.length + memberUsers.length);
+  const viewerList = userDetails.slice(adminUser.length + memberUsers.length);
+
+  const allUsers = [
+    ...adminList.map((user) => ({ name: user.name, email: user.email, role: 'Admin' })),
+    ...memberList.map((user) => ({ name: user.name, email: user.email, role: 'Member' })),
+    ...viewerList.map((user) => ({ name: user.name, email: user.email, role: 'Viewer' }))
+  ];
+
+  return allUsers;
+}
+
 const AccessTable = () => {
   const [users, setUsers] = useState([]);
 
   useEffect(() => {
-    const token = getCookie('token');
-    const urlParams = new URLSearchParams(window.location.search);
-    const userID = urlParams.get('userid');
+    const fetchData = async () => {
+      const token = getCookie('token');
+      const urlParams = new URLSearchParams(window.location.search);
+      const userID = urlParams.get('userid');
 
-    if (token && userID) {
-      fetchProjectID(token, userID)
-        .then((data) => {
-          fetchProject(token, data.projectID)
-            .then((project) => {
-              const { admin, members, viewers } = project;
-              const adminUser = [getUserDetails(token, admin)]
-              const memberUsers = members.map((member) => getUserDetails(token, member));
-              const viewerUsers = viewers.map((viewer) => getUserDetails(token, viewer));
-              
-              Promise.all([
-                ...adminUser,
-                ...memberUsers,
-                ...viewerUsers
-              ]).then((UserDetails) => {
-                const adminList = UserDetails.slice(0, adminUser.length);
-                const memberList = UserDetails.slice(adminUser.length, adminUser.length + memberUsers.length);
-                const viewerList = UserDetails.slice(adminUser.length + memberUsers.length);
+      if (token && userID) {
+        try {
+          const data = await fetchProjectID(token, userID);
+          const project = await fetchProject(token, data.projectID);
+          const allUsers = await parseUserDetails(project, token);
+          setUsers(allUsers);
+        } catch (error) {
+          console.error('Error fetching data:', error);
+        }
+      } else {
+        console.error('Token or userID not found');
+        setUsers(sampleUsers);
+      }
+    };
 
-                const allUsers = [
-                  ...adminList.map((user) => ({ name: user.name, email: user.email, role: 'Admin' })),
-                  ...memberList.map((user) => ({ name: user.name, email: user.email, role: 'Member' })),
-                  ...viewerList.map((user) => ({ name: user.name, email: user.email, role: 'Viewer' }))
-                ];
-
-                setUsers(allUsers);
-              })
-            })
-            .catch((error) => {
-              console.error('Error fetching project:', error);
-            });
-        })
-        .catch((error) => {
-          console.error('Error fetching project ID:', error);
-        });
-    } else {
-      console.error('Token or userID not found');
-      setUsers(sampleUsers);
-    }
+    fetchData();
   }, []);
 
   return (
