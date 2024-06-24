@@ -19,7 +19,8 @@ function loginUser(email, password) {
 		.then((data) => {
 			if (data.token) {
 				document.cookie = `token=${data.token}; max-age=${60 * 60 * 24 * 7}`;
-				window.location.href = `/dashboard?userid=${data.user_id}`; // TODO: change redirect to /dashboard
+				window.location.href = `/dashboard?userid=${data.user._id}`; // TODO: change redirect to /dashboard
+				console.log(`token:${data.token}`)
 			} else {
 				console.log(data.error);
 			}
