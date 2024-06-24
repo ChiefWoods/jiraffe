@@ -14,13 +14,128 @@ const roleStyles = {
   Viewer: 'bg-orange-100 text-orange-700 px-2 py-1 rounded'
 };
 
+function getCookie(name) {
+  const cookies = document.cookie.split(';');
+  for (let cookie of cookies) {
+    const [cookieName, cookieValue] = cookie.split('=');
+    if (cookieName.trim() === name) {
+      return cookieValue;
+    }
+  }
+  return null;
+}
+
+async function fetchProjectID(token, userID) {
+  try {
+    const response = await fetch(`${import.meta.env.VITE_BACK_END_URL}/project/user/${userID}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    if (response.ok) {
+      const data = await response.json();
+      return {
+        projectID: data.projectID,
+        projectName: data.projectName
+      }; // Assuming the response provides project ID and name
+    } else {
+      throw new Error('Failed to fetch projectid');
+    }
+  } catch (error) {
+    console.error('Error fetching projectid:', error);
+    throw error; // Propagate the error for handling in the calling code
+  }
+}
+
+async function fetchProject(token, projectID) {
+  try {
+    const response = await fetch(`${import.meta.env.VITE_BACK_END_URL}/project/${projectID}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      return data.project; // Assuming the response provides the project object directly
+    } else {
+      throw new Error('Failed to fetch project');
+    }
+  } catch (error) {
+    console.error('Error fetching project:', error);
+    throw error; // Propagate the error for handling in the calling code
+  }
+}
+
+async function getUserDetails(token, userID) {
+  try {
+    const response = await fetch(`${import.meta.env.VITE_BACK_END_URL}/user/userdetails/${userID}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    if (response.ok) {
+      const data = await response.json();
+      return data.user; // Assuming the response provides user details directly
+    } else {
+      throw new Error('Failed to fetch user details');
+    }
+  } catch (error) {
+    console.error('Error fetching user details:', error);
+    throw error; // Propagate the error for handling in the calling code
+  }
+}
+
 const AccessTable = () => {
   const [users, setUsers] = useState([]);
 
   useEffect(() => {
-    // Fetch users from your API or use sample data
-    // fetch('/api/users').then(response => response.json()).then(data => setUsers(data));
-    setUsers(sampleUsers);
+    const token = getCookie('token');
+    const urlParams = new URLSearchParams(window.location.search);
+    const userID = urlParams.get('userid');
+
+    if (token && userID) {
+      fetchProjectID(token, userID)
+        .then((data) => {
+          fetchProject(token, data.projectID)
+            .then((project) => {
+              const { admin, members, viewers } = project;
+              const adminUser = [getUserDetails(token, admin)]
+              const memberUsers = members.map((member) => getUserDetails(token, member));
+              const viewerUsers = viewers.map((viewer) => getUserDetails(token, viewer));
+              
+              Promise.all([
+                ...adminUser,
+                ...memberUsers,
+                ...viewerUsers
+              ]).then((UserDetails) => {
+                const adminList = UserDetails.slice(0, adminUser.length);
+                const memberList = UserDetails.slice(adminUser.length, adminUser.length + memberUsers.length);
+                const viewerList = UserDetails.slice(adminUser.length + memberUsers.length);
+
+                const allUsers = [
+                  ...adminList.map((user) => ({ name: user.name, email: user.email, role: 'Admin' })),
+                  ...memberList.map((user) => ({ name: user.name, email: user.email, role: 'Member' })),
+                  ...viewerList.map((user) => ({ name: user.name, email: user.email, role: 'Viewer' }))
+                ];
+
+                setUsers(allUsers);
+              })
+            })
+            .catch((error) => {
+              console.error('Error fetching project:', error);
+            });
+        })
+        .catch((error) => {
+          console.error('Error fetching project ID:', error);
+        });
+    } else {
+      console.error('Token or userID not found');
+      setUsers(sampleUsers);
+    }
   }, []);
 
   return (
