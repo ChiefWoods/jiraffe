@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { logo_title } from "../assets";
+import { logo_title,Foambg } from "../assets";
 import { FaCheckCircle } from "react-icons/fa";
 
 function registerUser(name, email, password) {
@@ -36,23 +36,24 @@ const Register = () => {
 	}
 
 	return (
-		<div className="min-h-screen flex items-center justify-center">
-			<div className="w-full max-w-md px-6 bg-white rounded-lg shadow-md">
+		<div className="min-h-screen justify-center items-center" >
+			<div className="bg-cover bg-center flex items-center justify-center min-h-screen" style={{backgroundImage:`url(${Foambg})`}}>
+				<div className="w-[75%] h-[80%] max-w-md px-6 py-3 bg-white rounded-2xl shadow-md ">
 				<div className="text-center">
 					<img src={logo_title} className="mx-auto" alt="Logo" />
 				</div>
-				<div className="mt-4">
+				<div className="mb-2 md:mt-4">
 					<form onSubmit={handleSubmit}>
-						<div className="mb-4">
-							<div className="mb-4">
+						<div className="mb-2 md:mb-4">
+							<div className="mb-2 md:mb-4 px-1 md:px-3">
 								<label
 									className="block text-gray-700 text-sm font-bold mb-2"
-									htmlFor="email"
+									htmlFor="text"
 								>
 									Name:
 								</label>
 								<input
-									className="bg-[#DEDCFF] placeholder:text-black shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+									className="bg-gradient-to-r from-[#9F9AFF] to-[#A6C2EC] text-sm md:text-base  placeholder:text-white shadow appearance-none border rounded w-full py-2 px-3 text-white leading-tight focus:outline-none focus:shadow-outline"
 									id="name"
 									type="text"
 									placeholder="Enter your name"
@@ -60,7 +61,7 @@ const Register = () => {
 									onChange={(e) => setName(e.target.value)}
 								/>
 							</div>
-							<div className="mb-4">
+							<div className="mb-2 md:mb-4 px-1 md:px-3">
 								<label
 									className="block text-gray-700 text-sm font-bold mb-2"
 									htmlFor="email"
@@ -68,7 +69,7 @@ const Register = () => {
 									Email:
 								</label>
 								<input
-									className="bg-[#DEDCFF] placeholder:text-black shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+									className="bg-gradient-to-r from-[#9F9AFF] to-[#A6C2EC] placeholder:text-white text-sm md:text-base shadow appearance-none border rounded w-full py-2 px-3 text-white leading-tight focus:outline-none focus:shadow-outline"
 									id="email"
 									type="email"
 									placeholder="Enter your email"
@@ -76,7 +77,7 @@ const Register = () => {
 									onChange={(e) => setEmail(e.target.value)}
 								/>
 							</div>
-							<div className="mb-4">
+							<div className="mb-2 md:mb-4 px-1 md:px-3">
 								<label
 									className="block text-gray-700 text-sm font-bold mb-2"
 									htmlFor="password"
@@ -84,7 +85,7 @@ const Register = () => {
 									Password:
 								</label>
 								<input
-									className="bg-[#DEDCFF] placeholder:text-black shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+									className="bg-gradient-to-r from-[#9F9AFF] to-[#A6C2EC]  placeholder:text-white text-sm md:text-base shadow appearance-none border rounded w-full py-2 px-3 text-white leading-tight focus:outline-none focus:shadow-outline"
 									id="password"
 									type="password"
 									placeholder="Enter your password"
@@ -93,8 +94,8 @@ const Register = () => {
 								/>
 							</div>
 
-							<div className="text-center">
-								<button className="bg-green-400 hover:bg-green-600 flex justify-center  mx-auto items-center rounded-3xl w-[40%] mb-2 text-white ">
+							<div className="text-center  mt-6 md:mt-8">
+								<button className="bg-green-400 mb-3 flex justify-center  mx-auto items-center rounded-3xl  mb-2 text-white shadow-md hover:scale-105 ">
 									<span className="mr-[3px]">Sign Up!</span>
 									<FaCheckCircle />
 								</button>
@@ -102,7 +103,7 @@ const Register = () => {
 									Already have an account?{" "}
 									<a
 										href="/login"
-										className="hover:text-blue-600 text-blue-400"
+										className="hover:text-[#6388bf] text-[#9F9AFF]"
 									>
 										Sign In Here!
 									</a>
@@ -112,6 +113,8 @@ const Register = () => {
 					</form>
 				</div>
 			</div>
+			</div>
+			
 		</div>
 	);
 };

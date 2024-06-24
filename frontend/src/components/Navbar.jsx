@@ -35,7 +35,7 @@ const Navbar = ({
 						<span>
 							<MdDashboard className="text-white text-2xl mx-2" />
 						</span>
-						<a href="#" className="text-white hover:underline ml-2">
+						<a href="/dashboard" className="text-white hover:underline ml-2">
 							Dashboard
 						</a>
 					</li>
