@@ -68,29 +68,34 @@ projectRouter.get("/user/:user_id",async(req,res)=>{
 })
 
 // Update project
-  .put(async (req, res) => {
-    try {
-      const { name } = req.body;
+projectRouter.put("/:project_id", async (req, res) => {
+  try {
+    const { project_id } = req.params;
+    const { name } = req.body;
 
-      if (!name) {
-        return res.status(400).json({ message: "Name is required." });
-      }
-
-      const result = await Project.findByIdAndUpdate(
-        req.params.project_id,
-        { name },
-        { new: true },
-      );
-
-      if (!result) {
-        return res.status(404).json({ message: "Project not found." });
-      }
-
-      res.status(200).json({ project: result });
-    } catch (err) {
-      res.status(500).json({ message: err.message });
+    if (!mongoose.Types.ObjectId.isValid(project_id)) {
+      return res.status(400).json({ message: "Valid Project ID is required." });
     }
-  });
+
+    if (!name) {
+      return res.status(400).json({ message: "Name is required." });
+    }
+
+    const result = await Project.findByIdAndUpdate(
+      project_id,
+      { name },
+      { new: true }
+    );
+
+    if (!result) {
+      return res.status(404).json({ message: "Project not found." });
+    }
+
+    res.status(200).json({ project: result });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
 
 projectRouter
   .route("/:project_id/task")
