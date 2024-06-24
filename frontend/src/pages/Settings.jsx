@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import {
   Navbar,
   AddCard,
-  UpdateProject
+  UpdateProject,
+  AccessTable
 } from '../components';
 
 const Settings = () => {
@@ -13,12 +14,7 @@ const Settings = () => {
         {/* Project Settings */}
         <UpdateProject />
         {/* Access Control */}
-        <div className='mt-12 flex flex-col'>
-          <div className='flex mt-8 ml-2 justify-between w-[930px]'>
-            <p className='font-bold text-3xl text-blue-700 mb-8'>Access</p>
-            <button className='bg-blue-700 text-white w-[100px] p-0 rounded h-[30px] text-sm'>Add User</button>
-          </div>
-        </div>
+        <AccessTable />
       </div>
     </div>
   );

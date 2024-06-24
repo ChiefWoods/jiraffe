@@ -5,6 +5,7 @@ import Work from './work';
 import Lane from './lane';
 import EditUserCard from './EditUserCard';
 import UpdateProject from './UpdateProject';
+import AccessTable from './AccessTable';
 
 export {
   Navbar,
@@ -13,5 +14,6 @@ export {
   Work,
   Lane,
   EditUserCard,
-  UpdateProject
+  UpdateProject,
+  AccessTable
 }
