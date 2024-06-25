@@ -70,7 +70,7 @@ async function updateProjectName(projectID, projectName) {
       console.log('Project name updated successfully');
     } else {
       const data = await response.json();
-      console.log(data.message);
+      console.error(data.message);
     }
   } catch (error) {
     console.error('Error updating project name:', error);

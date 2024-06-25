@@ -6,7 +6,6 @@ import { IoIosUndo } from "react-icons/io";
 const DashboardLink = () => {
   const searchParams = new URLSearchParams(window.location.search);
   const userId = searchParams.get('userid');
-  console.log('userID: ' + userId)
 
   const navigateToDashboard = (e) => {
     e.preventDefault();

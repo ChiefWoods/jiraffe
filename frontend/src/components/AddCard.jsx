@@ -57,7 +57,6 @@ const AddCard = ({ isOpen, onClose, projectId }) => {
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("Viewer");
   const rolesArray = ["Viewer", "Member"];
-  console.log(projectId)
 
   useEffect(() => {
     if (isOpen) {

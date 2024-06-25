@@ -259,4 +259,25 @@ projectRouter
     }
   });
 
+// Get all projects based on user_id
+projectRouter.get("/allprojs/:user_id", async (req, res) => {
+  try {
+    const { user_id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(user_id)) {
+      return res.status(400).json({ error: "Valid User ID is required." });
+    }
+
+    console.log(`Fetching projects for userID: ${user_id}`);
+
+    const projects = await Project.find({
+      $or: [{ admin: user_id }, { members: user_id }, { viewers: user_id }],
+    });
+
+    res.status(200).json({ projects });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 export default projectRouter;
