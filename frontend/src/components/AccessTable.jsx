@@ -41,13 +41,13 @@ async function fetchProjectID(token, userID) {
       return {
         projectID: data.projectID,
         projectName: data.projectName
-      }; // Assuming the response provides project ID and name
+      };
     } else {
       throw new Error('Failed to fetch projectid');
     }
   } catch (error) {
     console.error('Error fetching projectid:', error);
-    throw error; // Propagate the error for handling in the calling code
+    throw error;
   }
 }
 
@@ -62,13 +62,13 @@ async function fetchProject(token, projectID) {
 
     if (response.ok) {
       const data = await response.json();
-      return data.project; // Assuming the response provides the project object directly
+      return data.project;
     } else {
       throw new Error('Failed to fetch project');
     }
   } catch (error) {
     console.error('Error fetching project:', error);
-    throw error; // Propagate the error for handling in the calling code
+    throw error;
   }
 }
 
@@ -82,13 +82,13 @@ async function getUserDetails(token, userID) {
     });
     if (response.ok) {
       const data = await response.json();
-      return data.user; // Assuming the response provides user details directly
+      return data.user;
     } else {
       throw new Error('Failed to fetch user details');
     }
   } catch (error) {
     console.error('Error fetching user details:', error);
-    throw error; // Propagate the error for handling in the calling code
+    throw error;
   }
 }
 
@@ -135,7 +135,7 @@ const AccessTable = () => {
       if (token && userID) {
         try {
           const data = await fetchProjectID(token, userID);
-          setProjectId(data.projectID);  // Save project ID
+          setProjectId(data.projectID);
           const project = await fetchProject(token, data.projectID);
           const allUsers = await parseUserDetails(project, token);
           setUsers(allUsers);
@@ -175,8 +175,12 @@ const AccessTable = () => {
                 <span className={roleStyles[user.role]}>{user.role}</span>
               </td>
               <td className='py-2'>
-                <button className='bg-gray-100 text-blue-700 mr-2'>✏️</button>
-                <button className='bg-gray-100 text-red-700'>🗑️</button>
+                {user.role !== 'Admin' && (
+                  <>
+                    <button className='bg-gray-100 text-blue-700 mr-2'>✏️</button>
+                    <button className='bg-gray-100 text-red-700'>🗑️</button>
+                  </>
+                )}
               </td>
             </tr>
           ))}
