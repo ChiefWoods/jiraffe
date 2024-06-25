@@ -35,7 +35,7 @@ async function fetchUsername(token, userID) {
   }
 }
 
-async function fetchProjectID(token, userID) {
+async function fetchProject(token, userID) {
   try {
     const response = await fetch(`${import.meta.env.VITE_BACK_END_URL}/project/user/${userID}`, {
       method: 'GET',
@@ -46,8 +46,11 @@ async function fetchProjectID(token, userID) {
     if (response.ok) {
       const data = await response.json();
       return {
-        projectID: data.projectID,
-        projectName: data.projectName
+        projectID: data._id,
+        projectName: data.names,
+        projectAdmin:data.admins,
+        projectMembers:data.members,
+        projectViewers:data.viewers
       }; // Assuming the response provides project ID and name
     } else {
       throw new Error('Failed to fetch projectid');
@@ -121,6 +124,9 @@ const Dashboard = () => {
   const [username, setUsername] = useState(null);
   const [projectID, setProjectID] = useState(null);
   const [projectName, setProjectName] = useState(null);
+  const [projectMembers, setprojectMembers] = useState([]);
+  const [projectViewers, setprojectViewers] = useState([]);
+  const [projectAdmin, setprojectAdmin] = useState([]);
   const [tasks, setTasks] = useState([]);
   const [isTaskCardOpen, setisTaskCardOpen] = useState(false);
   const [isAddCardOpen, setisAddCardOpen] = useState(false); // State to control the modal
@@ -147,11 +153,15 @@ const Dashboard = () => {
           console.error('Error fetching username:', error);
         });
 
-      fetchProjectID(token, userID)
+      fetchProject(token, userID)
         .then(projectDetails => {
-          const { projectID, projectName } = projectDetails;
+          const { projectID, projectName,projectMembers,projectViewers,projectAdmin } = projectDetails;
           setProjectID(projectID);
           setProjectName(projectName);
+          setprojectMembers(projectMembers)
+          setprojectViewers(projectMembers)
+          setprojectAdmin(projectAdmin);
+          console.log(projectMembers);
           console.log(projectID)
           if (projectID) {
             return fetchTasks(token, projectID);
@@ -167,6 +177,8 @@ const Dashboard = () => {
         });
     }
   }, []);
+
+  const assignees=[...projectMembers,...projectViewers,...projectAdmin]
 
   const handleDeleteTask=async(taskID)=>{
     try{
@@ -240,7 +252,7 @@ const Dashboard = () => {
           isEditing={isEditing}
           taskStatusOptions={['TO DO', 'IN PROGRESS', 'DONE']}
           onClose={closeTaskCard}
-          availableAssignees={selectedTask.assignee}
+          availableAssignees={assignees}
           />
         )}
       </div>
