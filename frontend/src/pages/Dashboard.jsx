@@ -170,9 +170,11 @@ const Dashboard = () => {
     setisTaskCardOpen(true);
   };
 
-  const handleAddTaskClick=(task)=>{
+  const handleAddTaskClick=(laneName)=>{
     console.log('handleaddtask clicked')
-    setSelectedTask(task);
+    setSelectedTask({
+      status:laneName
+    });
     console.log(selectedTask);
     setisEditing(false);
     setisTaskCardOpen(true);
@@ -185,7 +187,7 @@ const Dashboard = () => {
   }
 
   const swimlanes = [
-    { name: 'TO DO', icon: 'box', bgcolor: '#DEDCFF', strokecolor: '#81ACF  F', textcolor: '#0046AF' },
+    { name: 'TO DO', icon: 'box', bgcolor: '#DEDCFF', strokecolor: '#81ACFF', textcolor: '#0046AF' },
     { name: 'IN PROGRESS', icon: 'time', bgcolor: '#FFF6EB', strokecolor: '#FFE4C2', textcolor: '#8F4F00' },
     { name: 'DONE', icon: 'check', bgcolor: '#E9FFEA', strokecolor: '#AAF0C9', textcolor: '#3A5F3A' }
   ];
@@ -222,7 +224,7 @@ const Dashboard = () => {
           isEditing={isEditing}
           taskStatusOptions={['TO DO', 'IN PROGRESS', 'DONE']}
           onClose={closeTaskCard}
-          availableAssignees={['','user1','user2']}
+          availableAssignees={selectedTask.assignee}
           />
         )}
       </div>

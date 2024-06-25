@@ -31,6 +31,10 @@ const Lane = ({ lane, tasks, onDeleteTask, onTaskClick, onAddTaskClick }) => {
     '--hover-bgcolor': lane.bgcolor,
   };
 
+  const handleAddTaskClick=()=>{
+    onAddTaskClick(lane.name)
+  }
+
   return (
     <div className='mx-5 w-[33%]'>
       <div className={`border-solid border-[3px] rounded-2xl p-5`} style={style}>
@@ -55,7 +59,7 @@ const Lane = ({ lane, tasks, onDeleteTask, onTaskClick, onAddTaskClick }) => {
 
       {/* "+" button */}
       <div className="justify-center text-center content-center mt-4">
-        <div className='bg-[#0052CC] rounded-3xl w-[40px] h-[40px] mx-auto flex text-center text-white text-[35px] justify-center items-center hover:bg-blue-600 hover:cursor-pointer transition-transform duration-300 hover:scale-110' onClick={onAddTaskClick}>
+        <div className='bg-[#0052CC] rounded-3xl w-[40px] h-[40px] mx-auto flex text-center text-white text-[35px] justify-center items-center hover:bg-blue-600 hover:cursor-pointer transition-transform duration-300 hover:scale-110' onClick={handleAddTaskClick}>
           +
         </div>
       </div>

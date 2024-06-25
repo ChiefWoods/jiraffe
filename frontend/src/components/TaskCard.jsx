@@ -92,7 +92,7 @@ const TaskCard = ({ task, isEditing, taskStatusOptions, onClose, availableAssign
               />
 
 <div>
-              <p className='mt-4 text-gray-700 font-semibold'>Assignee:</p>
+              <p className=' text-gray-700 font-semibold'>Assignee:</p>
               <Select
                 isMulti
                 options={assigneeOptions}
