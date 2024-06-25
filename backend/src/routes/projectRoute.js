@@ -204,12 +204,14 @@ projectRouter
         }
 
         project.viewers = project.viewers.filter(viewer => viewer.toString() !== userIdStr);
-      } else {
+      } else if (role === "viewer") {
         if (!project.viewers.includes(userIdStr)) {
           project.viewers.push(user_id);
         }
 
         project.members = project.members.filter(member => member.toString() !== userIdStr);
+      } else {
+        return res.status(400).json({ message: "Role must be either 'member' or 'viewer'." });
       }
 
       await project.save();

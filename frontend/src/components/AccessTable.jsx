@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import {
   AddCard,
+  EditUserCard
 } from '../components';
 
 // Sample data
@@ -121,14 +122,43 @@ const AccessTable = () => {
   const [users, setUsers] = useState([]);
   const [isAddCardOpen, setIsAddCardOpen] = useState(false);
   const [projectId, setProjectId] = useState(null);
+  const [isEditCardOpen, setIsEditCardOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
 
   const toggleAddCard = () => {
     setIsAddCardOpen(!isAddCardOpen);
   };
 
+  const toggleEditCard = (user) => {
+    setSelectedUser(user);
+    setIsEditCardOpen(!isEditCardOpen);
+  };
+
+  const updateUserRole = async (userId, newRole) => {
+    const token = getCookie('token');
+    try {
+      const response = await fetch(`${import.meta.env.VITE_BACK_END_URL}/project/${projectId}/user`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ user_id: userId, role: newRole.toLowerCase() }) // Ensure role is lowercase
+      });
+      if (response.ok) {
+        setUsers(users.map(user => user.id === userId ? { ...user, role: newRole } : user));
+        setIsEditCardOpen(false);
+      } else {
+        const errorData = await response.json();
+        console.error('Failed to update user role:', errorData);
+      }
+    } catch (error) {
+      console.error('Error updating user role:', error);
+    }
+  };
+
   const deleteUser = async (userId) => {
     const token = getCookie('token');
-    console.log(`Deleting user with ID: ${userId} from project ID: ${projectId}`);
     try {
       const response = await fetch(`${import.meta.env.VITE_BACK_END_URL}/project/${projectId}/user`, {
         method: 'DELETE',
@@ -200,7 +230,7 @@ const AccessTable = () => {
               <td className='py-2'>
                 {user.role !== 'Admin' && (
                   <>
-                    <button className='bg-gray-100 text-blue-700 mr-2'>✏️</button>
+                    <button className='bg-gray-100 text-blue-700 mr-2' onClick={() => toggleEditCard(user)}>✏️</button>
                     <button
                       className='bg-gray-100 text-red-700'
                       onClick={() => deleteUser(user.id)}
@@ -216,6 +246,15 @@ const AccessTable = () => {
       </table>
       {/* Add Card */}
       <AddCard isOpen={isAddCardOpen} onClose={toggleAddCard} projectId={projectId} />
+      {/* Edit Card */}
+      {isEditCardOpen && selectedUser && (
+        <EditUserCard
+          isOpen={isEditCardOpen}
+          onClose={() => setIsEditCardOpen(false)}
+          user={selectedUser}
+          onSave={updateUserRole}
+        />
+      )}
     </div>
   );
 };
