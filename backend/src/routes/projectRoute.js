@@ -56,12 +56,12 @@ projectRouter.get("/user/:user_id",async(req,res)=>{
 
     console.log(`Fetching project for userID:${user_id}`);
 
-    const project=await Project.findOne({admin:user_id});
+    const project=await Project.findOne({projectLead:user_id});
     if(!project){
       console.error('Project not found');
       return res.status(404).json({error:'User not found.'});
     }
-    res.status(200).json({projectID:project._id,projectName:project.name});
+    res.status(200).json(project);
   }catch(err){
     res.status(500).json({message:err.message});
   }
