@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Navbar, Lane,AddCard  } from '../components';
+import { Navbar, Lane,AddCard, TaskCard  } from '../components';
 import { IoIosSettings } from "react-icons/io";
+import Select from 'react-select'
 import { FaTasks } from "react-icons/fa";
 
 function getCookie(name) {
@@ -102,12 +103,15 @@ const Dashboard = () => {
   const [projectID, setProjectID] = useState(null);
   const [projectName, setProjectName] = useState(null);
   const [tasks, setTasks] = useState([]);
-  const [isAddCardOpen, setIsAddCardOpen] = useState(false); // State to control the modal
+  const [isTaskCardOpen, setisTaskCardOpen] = useState(false);
+  const [isAddCardOpen, setisAddCardOpen] = useState(false); // State to control the modal
+  const [selectedTask,setSelectedTask]=useState(null); //state to manage selected task
+  const [isEditing,setisEditing]=useState(false)
 
   const rolesArray = ["Viewer", "Member", "Admin"];
 
   const toggleAddCard = () => {
-    setIsAddCardOpen(!isAddCardOpen); // Toggle the state to open or close the modal
+    setisAddCardOpen(!isAddCardOpen); // Toggle the state to open or close the modal
   };
 
   useEffect(() => {
@@ -160,8 +164,28 @@ const Dashboard = () => {
     }
   }
 
+  const handleTaskClick=(task)=>{
+    setSelectedTask(task);
+    setisEditing(true);
+    setisTaskCardOpen(true);
+  };
+
+  const handleAddTaskClick=(task)=>{
+    console.log('handleaddtask clicked')
+    setSelectedTask(task);
+    console.log(selectedTask);
+    setisEditing(false);
+    setisTaskCardOpen(true);
+    console.log(isTaskCardOpen)
+  }
+
+  const closeTaskCard=()=>{
+    setSelectedTask(null);
+    setisTaskCardOpen(false);
+  }
+
   const swimlanes = [
-    { name: 'TO DO', icon: 'box', bgcolor: '#DEDCFF', strokecolor: '#81ACFF', textcolor: '#0046AF' },
+    { name: 'TO DO', icon: 'box', bgcolor: '#DEDCFF', strokecolor: '#81ACF  F', textcolor: '#0046AF' },
     { name: 'IN PROGRESS', icon: 'time', bgcolor: '#FFF6EB', strokecolor: '#FFE4C2', textcolor: '#8F4F00' },
     { name: 'DONE', icon: 'check', bgcolor: '#E9FFEA', strokecolor: '#AAF0C9', textcolor: '#3A5F3A' }
   ];
@@ -171,7 +195,7 @@ const Dashboard = () => {
       <Navbar />
       <div className="w-[100%] px-10 py-5">
         <div className="mr-[20px] mt-5 flex flex-row justify-between">
-          <p className="text-[#0052CC] text-[33px] font-semibold">online-task-mgmt-tool</p>
+          <p className="text-[#0052CC] text-[33px] font-semibold">{projectName}</p>
           <div className='flex flex-row'>
             <button className="border-slate-400 border-2 bg-white text-slate-400 hover:text-white text-slate-400 mr-5 flex flex-row hover:bg-slate-400 group items-center">
               <IoIosSettings className='text-2xl mr-1 group-hover:animate-spin' />
@@ -183,20 +207,24 @@ const Dashboard = () => {
             </button>
           </div>
         </div>
-        <div className='ml-[20px] mt-[10px] items-center'>
-          <p className='text-[#0052CC] text-[28px] font-semibold'>{projectName}</p>
-          <div className='w-fit py-2 px-3 mt-[20px] rounded-3xl border-2 border-[#0052CC]'>
-            <p className='flex flex-row text-[28px] font-semibold ml-[5px] text-[#0052CC]'><FaTasks className='mr-[5px]' />Task List</p>
-          </div>
-        </div>
 
         <div className="flex flex-row w-[80%] mt-6">
           {swimlanes.map((swimlane, index) => (
-            <Lane key={index} lane={swimlane} tasks={tasks.filter(task => task.status === swimlane.name)} onDeleteTask={handleDeleteTask} />
+            <Lane key={index} lane={swimlane} tasks={tasks.filter(task => task.status === swimlane.name)} onDeleteTask={handleDeleteTask} onTaskClick={handleTaskClick} onAddTaskClick={handleAddTaskClick}/>
           ))}
         </div>
 
         <AddCard isOpen={isAddCardOpen} onClose={toggleAddCard} />
+        
+        {selectedTask && (
+          <TaskCard
+          task={selectedTask}
+          isEditing={isEditing}
+          taskStatusOptions={['TO DO', 'IN PROGRESS', 'DONE']}
+          onClose={closeTaskCard}
+          availableAssignees={['','user1','user2']}
+          />
+        )}
       </div>
     </div>
   );
