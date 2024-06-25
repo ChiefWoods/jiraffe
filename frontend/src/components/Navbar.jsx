@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { logo_blue } from "../assets";
 import { MdDashboard } from "react-icons/md";
-import { IoIosSettings } from "react-icons/io";
 import { IoIosUndo } from "react-icons/io";
 
 async function getProjectsByUserId(userId) {
@@ -17,6 +16,25 @@ async function getProjectsByUserId(userId) {
     }
   } catch (error) {
     console.error("Error fetching projects:", error);
+    throw error;
+  }
+}
+
+async function getProjectByAdmin(userId) {
+  try {
+    const response = await fetch(`${import.meta.env.VITE_BACK_END_URL}/project/adminproj/${userId}`, {
+      method: "GET",
+    });
+    if (response.ok) {
+      const data = await response.json();
+      return data.projects;
+    } else {
+      const errorText = await response.text();
+      console.error("Failed to fetch project:", response.status, errorText);
+      throw new Error("Failed to fetch project");
+    }
+  } catch (error) {
+    console.error("Error fetching project:", error);
     throw error;
   }
 }
@@ -45,6 +63,7 @@ const DashboardLink = () => {
 const Navbar = () => {
   const [currentProject, setCurrentProject] = useState(null);
   const [projects, setProjects] = useState([]);
+  const [adminProject, setAdminProject] = useState(null);
 
   function handleLogout(e) {
     e.preventDefault();
@@ -56,11 +75,22 @@ const Navbar = () => {
     const fetchData = async () => {
       const searchParams = new URLSearchParams(window.location.search);
       const userId = searchParams.get('userid');
-  
+    
       if (userId) {
-        const projects = await getProjectsByUserId(userId);
-        setProjects(projects);
-        setCurrentProject(projects[0]);
+        try {
+          const projects = await getProjectsByUserId(userId);
+          const adminProjects = await getProjectByAdmin(userId);
+          
+          if (adminProjects.length > 0) {
+            setAdminProject(adminProjects[0]);
+            setProjects(projects.filter(project => project._id !== adminProjects[0]._id));
+          } else {
+            setProjects(projects);
+          }
+          
+        } catch (error) {
+          console.error('Error fetching data:', error);
+        }
       } else {
         console.error('User ID not found in URL');
       }
@@ -73,6 +103,15 @@ const Navbar = () => {
     <div className="z-10 flex flex-col h-screen bg-[#0052CC] w-[230px] top-0 left-0 px-0 py-6">
       <img src={logo_blue} alt="Logo" className="w-48 mb-4" />
       <ul className="text-white-500 mx-2 pl-0 ml-2">
+        {adminProject && (
+          <li key={adminProject._id} className={`mb-2 bg-[#0052CC] text-white`}>
+            <button
+              className="block w-full text-left bg-[#0052CC] font-extrabold"
+            >
+              {adminProject.name}
+            </button>
+          </li>
+        )}
         {projects.map((project, index) => (
           <li key={index} className={`mb-2 bg-[#0052CC] text-white`}>
             <button
