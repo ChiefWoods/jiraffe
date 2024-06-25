@@ -97,6 +97,25 @@ async function deleteTask(token,taskID){
   }
 }
 
+const SettingsLink = () => {
+  const searchParams = new URLSearchParams(location.search);
+  const userId = searchParams.get('userid');
+
+  const navigateToSettings = (e) => {
+    e.preventDefault();
+    window.location.href = `/settings?userid=${userId}`;
+  };
+
+  return (
+    <a href="/settings" onClick={navigateToSettings}>
+      <button className="border-slate-400 border-2 bg-white text-slate-400 hover:text-white text-slate-400 mr-5 flex flex-row hover:bg-slate-400 group items-center">
+        <IoIosSettings className='text-2xl mr-1 group-hover:animate-spin' />
+        Settings
+      </button>
+    </a>
+  );
+};
+
 const Dashboard = () => {
   const [username, setUsername] = useState(null);
   const [projectID, setProjectID] = useState(null);
@@ -173,10 +192,7 @@ const Dashboard = () => {
         <div className="mr-[20px] mt-5 flex flex-row justify-between">
           <p className="text-[#0052CC] text-[33px] font-semibold">online-task-mgmt-tool</p>
           <div className='flex flex-row'>
-            <button className="border-slate-400 border-2 bg-white text-slate-400 hover:text-white text-slate-400 mr-5 flex flex-row hover:bg-slate-400 group items-center">
-              <IoIosSettings className='text-2xl mr-1 group-hover:animate-spin' />
-              Settings
-            </button>
+            <SettingsLink />
             <button className="border-[#0052CC] border-2 bg-white text-[#0052CC] hover:bg-[#0052CC] hover:text-white flex flex-row items-center group" onClick={toggleAddCard}>
               <p className="text-2xl group-hover:animate-bounce mr-1">+</p>
               <p className='text-[16px]'>Add Task</p>

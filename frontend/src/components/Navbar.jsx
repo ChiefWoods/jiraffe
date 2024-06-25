@@ -3,6 +3,28 @@ import { MdDashboard } from "react-icons/md";
 import { IoIosSettings } from "react-icons/io";
 import { IoIosUndo } from "react-icons/io";
 
+const DashboardLink = () => {
+  const searchParams = new URLSearchParams(window.location.search);
+  const userId = searchParams.get('userid');
+  console.log('userID: ' + userId)
+
+  const navigateToDashboard = (e) => {
+    e.preventDefault();
+    window.location.href = `/dashboard?userid=${userId}`;
+  }
+
+  return (
+    <li className="flex items-center mr-2">
+      <span>
+        <MdDashboard className="text-white text-2xl mx-2" />
+      </span>
+      <a href="/dashboard" className="text-white hover:underline ml-2" onClick={navigateToDashboard}>
+        Dashboard
+      </a>
+    </li>
+  );
+}
+
 const Navbar = ({
 	current_project = "Project 1",
 	projects = ["Project 1", "Project 2", "Project 3"],
@@ -31,22 +53,7 @@ const Navbar = ({
 			</ul>
 			<div className="flex-grow flex flex-col justify-end mb-6">
 				<ul className="flex flex-col space-y-6 ml-6">
-					<li className="flex items-center mr-2">
-						<span>
-							<MdDashboard className="text-white text-2xl mx-2" />
-						</span>
-						<a href="/dashboard" className="text-white hover:underline ml-2">
-							Dashboard
-						</a>
-					</li>
-					<li className="flex items-center mr-2">
-						<span>
-							<IoIosSettings className="text-white text-2xl mx-2" />
-						</span>
-						<a href="#" className="text-white hover:underline ml-2">
-							Settings
-						</a>
-					</li>
+					<DashboardLink />
 					<li className="flex items-center mr-2">
 						<button className="flex items-center bg-white text-[#0052CC] hover:text-white hover:bg-[#0052CC] ml-1 px-2 py-1 rounded-lg w-[160px] transition-colors duration-300" onClick={handleLogout}>
 							<span>
