@@ -1,9 +1,17 @@
 import React from 'react';
-import { Navbar, TaskCard } from '../components';
+import {
+  Navbar,
+  TaskCard,
+  AddCard,
+  EditUserCard
+} from '../components';
 
 const Test = () => {
   return (
-    <Navbar />
+    <div className='flex'>
+      <Navbar />
+      <EditUserCard />
+    </div>
   )
 }
 

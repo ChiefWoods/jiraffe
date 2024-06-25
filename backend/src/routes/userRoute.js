@@ -48,5 +48,32 @@ userRouter.get('/username/:user_id', async (req, res) => {
   }
 });
 
+// Get user's details based on user ID
+userRouter.get("/userdetails/:user_id", async (req, res) => {
+  try {
+    const { user_id } = req.params;
+
+    if (!user_id) {
+      return res.status(400).send({ message: "User ID is required." });
+    }
+
+    const user = await User.findById(user_id);
+
+    res.status(200).json({ user });
+  } catch (err) {
+    res.status(500).send({ message: err.message });
+  }
+});
+
+// Get all users
+userRouter.get("/", async (req, res) => {
+  try {
+    const users = await User.find();
+    res.status(200).json({ users });
+  } catch (err) {
+    res.status(500).send({ message: err.message });
+  }
+});
+
 
 export default userRouter;

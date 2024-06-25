@@ -3,11 +3,17 @@ import TaskCard from './TaskCard';
 import AddCard from './AddCard';
 import Work from './TaskItem ';
 import Lane from './lane';
+import EditUserCard from './EditUserCard';
+import UpdateProject from './UpdateProject';
+import AccessTable from './AccessTable';
 
 export {
   Navbar,
   TaskCard,
   AddCard,
   Work,
-  Lane
+  Lane,
+  EditUserCard,
+  UpdateProject,
+  AccessTable
 }
