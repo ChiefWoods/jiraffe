@@ -177,7 +177,7 @@ projectRouter
     }
   })
 
-projectRouter
+  projectRouter
   .route("/:project_id/user")
   .all(checkProjectIdParam, checkUserIdBody)
   // Update user in project
@@ -187,9 +187,7 @@ projectRouter
       const { user_id, role } = req.body;
 
       if (!["member", "viewer"].includes(role)) {
-        return res
-          .status(400)
-          .json({ message: "Role must be either 'member' or 'viewer'." });
+        return res.status(400).json({ message: "Role must be either 'member' or 'viewer'." });
       }
 
       const project = await Project.findById(project_id);
@@ -198,22 +196,20 @@ projectRouter
         return res.status(404).json({ message: "Project not found." });
       }
 
+      const userIdStr = user_id.toString();
+
       if (role === "member") {
-        if (!project.members.includes(user_id)) {
+        if (!project.members.includes(userIdStr)) {
           project.members.push(user_id);
         }
 
-        project.viewers = project.viewers.filter(
-          (viewer) => viewer !== user_id,
-        );
+        project.viewers = project.viewers.filter(viewer => viewer.toString() !== userIdStr);
       } else {
-        if (!project.viewers.includes(user_id)) {
+        if (!project.viewers.includes(userIdStr)) {
           project.viewers.push(user_id);
         }
 
-        project.members = project.members.filter(
-          (member) => member !== user_id,
-        );
+        project.members = project.members.filter(member => member.toString() !== userIdStr);
       }
 
       await project.save();
@@ -222,7 +218,8 @@ projectRouter
         message: `User ${user_id}'s role updated in project ${project_id}.`,
       });
     } catch (err) {
-      res.status(500).json({ message: err.message });
+      console.error('Error updating user role:', err);
+      res.status(500).json({ message: "Internal server error." });
     }
   })
   // Remove user from project
@@ -237,8 +234,17 @@ projectRouter
         return res.status(404).json({ message: "Project not found." });
       }
 
-      project.members = project.members.filter((member) => member !== user_id);
-      project.viewers = project.viewers.filter((viewer) => viewer !== user_id);
+      const userIdStr = user_id.toString();
+
+      const originalMembersLength = project.members.length;
+      const originalViewersLength = project.viewers.length;
+
+      project.members = project.members.filter(member => member.toString() !== userIdStr);
+      project.viewers = project.viewers.filter(viewer => viewer.toString() !== userIdStr);
+
+      if (originalMembersLength === project.members.length && originalViewersLength === project.viewers.length) {
+        return res.status(404).json({ message: "User not found in project." });
+      }
 
       await project.save();
 
@@ -246,7 +252,8 @@ projectRouter
         message: `User ${user_id} removed from project ${project_id}.`,
       });
     } catch (err) {
-      res.status(500).json({ message: err.message });
+      console.error('Error removing user from project:', err);
+      res.status(500).json({ message: "Internal server error." });
     }
   });
 

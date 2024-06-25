@@ -5,10 +5,10 @@ import {
 
 // Sample data
 const sampleUsers = [
-  { name: 'user_name', email: 'user_email', role: 'Admin' },
-  { name: 'user_name', email: 'user_email', role: 'Member' },
-  { name: 'user_name', email: 'user_email', role: 'Member' },
-  { name: 'user_name', email: 'user_email', role: 'Viewer' }
+  { id: '1', name: 'user_name', email: 'user_email', role: 'Admin' },
+  { id: '2', name: 'user_name', email: 'user_email', role: 'Member' },
+  { id: '3', name: 'user_name', email: 'user_email', role: 'Member' },
+  { id: '4', name: 'user_name', email: 'user_email', role: 'Viewer' }
 ];
 
 const roleStyles = {
@@ -109,9 +109,9 @@ async function parseUserDetails(project, token) {
   const viewerList = userDetails.slice(adminUser.length + memberUsers.length);
 
   const allUsers = [
-    ...adminList.map((user) => ({ name: user.name, email: user.email, role: 'Admin' })),
-    ...memberList.map((user) => ({ name: user.name, email: user.email, role: 'Member' })),
-    ...viewerList.map((user) => ({ name: user.name, email: user.email, role: 'Viewer' }))
+    ...adminList.map((user) => ({ id: user._id, name: user.name, email: user.email, role: 'Admin' })),
+    ...memberList.map((user) => ({ id: user._id, name: user.name, email: user.email, role: 'Member' })),
+    ...viewerList.map((user) => ({ id: user._id, name: user.name, email: user.email, role: 'Viewer' }))
   ];
 
   return allUsers;
@@ -124,6 +124,29 @@ const AccessTable = () => {
 
   const toggleAddCard = () => {
     setIsAddCardOpen(!isAddCardOpen);
+  };
+
+  const deleteUser = async (userId) => {
+    const token = getCookie('token');
+    console.log(`Deleting user with ID: ${userId} from project ID: ${projectId}`);
+    try {
+      const response = await fetch(`${import.meta.env.VITE_BACK_END_URL}/project/${projectId}/user`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ user_id: userId })
+      });
+      if (response.ok) {
+        setUsers(users.filter(user => user.id !== userId));
+      } else {
+        const errorData = await response.json();
+        console.error('Failed to delete user:', errorData);
+      }
+    } catch (error) {
+      console.error('Error deleting user:', error);
+    }
   };
 
   useEffect(() => {
@@ -178,7 +201,12 @@ const AccessTable = () => {
                 {user.role !== 'Admin' && (
                   <>
                     <button className='bg-gray-100 text-blue-700 mr-2'>✏️</button>
-                    <button className='bg-gray-100 text-red-700'>🗑️</button>
+                    <button
+                      className='bg-gray-100 text-red-700'
+                      onClick={() => deleteUser(user.id)}
+                    >
+                      🗑️
+                    </button>
                   </>
                 )}
               </td>
