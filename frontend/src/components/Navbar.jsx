@@ -5,7 +5,7 @@ import { IoIosUndo } from "react-icons/io";
 
 async function getProjectsByUserId(userId) {
   try {
-    const response = await fetch(`${import.meta.env.VITE_BACK_END_URL}/project/allprojs/${userId}`, {
+    const response = await fetch(`${import.meta.env.VITE_BACK_END_URL}/project/all/${userId}`, {
       method: "GET",
     });
     if (response.ok) {
@@ -22,7 +22,7 @@ async function getProjectsByUserId(userId) {
 
 async function getProjectByAdmin(userId) {
   try {
-    const response = await fetch(`${import.meta.env.VITE_BACK_END_URL}/project/adminproj/${userId}`, {
+    const response = await fetch(`${import.meta.env.VITE_BACK_END_URL}/project/admin/${userId}`, {
       method: "GET",
     });
     if (response.ok) {
