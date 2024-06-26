@@ -86,15 +86,15 @@ const UpdateProject = () => {
     const token = getCookie('token');
     const urlParams = new URLSearchParams(window.location.search);
     const userID = urlParams.get('userid');
+    const projectID = urlParams.get('projectid');
 
     if (token && userID) {
-      fetchProjectID(token, userID)
-        .then((projectDetails) => {
-          const { projectID } = projectDetails;
-          updateProjectName(projectID, projectName);
+      updateProjectName(projectID, projectName)
+        .then(() => {
+          console.log('Project name updated successfully');
         })
         .catch((error) => {
-          console.error('Error fetching projectID:', error);
+          console.error('Error updating project name:', error);
         });
     }
   }

@@ -287,4 +287,26 @@ projectRouter.get("/all/:user_id", async (req, res) => {
   }
 });
 
+/**
+ * Get project ID based on project name
+ * @deprecated Currently not in use
+ */
+projectRouter.get("/name/:project_name", async (req, res) => {
+  const { project_name } = req.params;
+
+  try {
+    const project = await Project.findOne({ name: project_name });
+
+    if (!project) {
+      console.error("Project not found.");
+      return res.status(404).json({ error: "Project not found." });
+    }
+
+    res.status(200).json({ projectID: project._id });
+  } catch (err) {
+    console.error("Error fetching project:", err);
+    res.status(500).json({ error: "Internal server error." });
+  }
+});
+
 export default projectRouter;

@@ -71,6 +71,13 @@ const Navbar = () => {
     window.location.href = "/login";
   }
 
+  function navigateToAnotherProject(projectId) {
+    const currentPath = window.location.pathname;
+    const searchParams = new URLSearchParams(window.location.search);
+    const userId = searchParams.get('userid');
+    window.location.href = `${currentPath}?userid=${userId}&projectid=${projectId}`;
+  }
+
   useEffect(() => {
     const fetchData = async () => {
       const searchParams = new URLSearchParams(window.location.search);
@@ -115,6 +122,7 @@ const Navbar = () => {
               className={`block w-full text-left bg-[#0052CC] ${
                 project === currentProject ? "font-extrabold" : "font-light"
               }`}
+              onClick={() => navigateToAnotherProject(project._id)}
             >
               {project.name}
             </button>
