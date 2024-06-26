@@ -11,49 +11,6 @@ function getCookie(name) {
   return null;
 }
 
-async function fetchUsername(token, userID) {
-  try {
-    const response = await fetch(`${import.meta.env.VITE_BACK_END_URL}/user/username/${userID}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    });
-    if (response.ok) {
-      const data = await response.json();
-      return data.username; // Assuming the response provides username under 'username'
-    } else {
-      throw new Error('Failed to fetch username');
-    }
-  } catch (error) {
-    console.error('Error fetching username:', error);
-    throw error; // Propagate the error for handling in the calling code
-  }
-}
-
-async function fetchProjectID(token, userID) {
-  try {
-    const response = await fetch(`${import.meta.env.VITE_BACK_END_URL}/project/user/${userID}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    });
-    if (response.ok) {
-      const data = await response.json();
-      return {
-        projectID: data.projectID,
-        projectName: data.projectName
-      }; // Assuming the response provides project ID and name
-    } else {
-      throw new Error('Failed to fetch projectid');
-    }
-  } catch (error) {
-    console.error('Error fetching projectid:', error);
-    throw error; // Propagate the error for handling in the calling code
-  }
-}
-
 async function updateProjectName(projectID, projectName) {
   const token = getCookie('token');
   try {
@@ -74,6 +31,44 @@ async function updateProjectName(projectID, projectName) {
     }
   } catch (error) {
     console.error('Error updating project name:', error);
+  }
+}
+
+async function fetchUsername(userID) {
+  try {
+    const response = await fetch(`${import.meta.env.VITE_BACK_END_URL}/user/username/${userID}`, {
+      method: 'GET',
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      return data.username;
+    } else {
+      console.error('Failed to fetch username:', response.statusText);
+      throw new Error('Failed to fetch username');
+    }
+  } catch (error) {
+    console.error('Error fetching username:', error);
+    throw new Error('Error fetching username');
+  }
+}
+
+async function fetchProjectDetails(projectId) {
+  try {
+    const response = await fetch(`${import.meta.env.VITE_BACK_END_URL}/project/${projectId}`, {
+      method: 'GET'
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      return data.project;
+    } else {
+      console.error('Failed to fetch project details:', response.statusText);
+      throw new Error('Failed to fetch project details');
+    }
+  } catch (error) {
+    console.error('Error fetching project details:', error);
+    throw new Error('Error fetching project details');
   }
 }
 
@@ -100,36 +95,30 @@ const UpdateProject = () => {
   }
 
   useEffect(() => {
-    const token = getCookie('token');
-    const urlParams = new URLSearchParams(window.location.search);
-    const userID = urlParams.get('userid');
-
-    if (token && userID) {
-      fetchUsername(token, userID)
-        .then((username) => {
+    const fetchDetails = async () => {
+      try {
+        const token = getCookie('token');
+        const urlParams = new URLSearchParams(window.location.search);
+        const userID = urlParams.get('userid');
+        const projectID = urlParams.get('projectid');
+  
+        if (token && userID && projectID) {
+          const project = await fetchProjectDetails(projectID);
+          setProjectName(project.name);
+  
+          const username = await fetchUsername(project.admin);
           setProjectLead(username);
-        })
-        .catch((error) => {
-          console.error('Error fetching username:', error);
-        });
-
-      fetchProjectID(token, userID)
-        .then((projectDetails) => {
-          const { projectID, projectName } = projectDetails;
-          setProjectName(projectName);
-        })
-        .catch((error) => {
-          console.error('Error fetching projectID:', error);
-        });
-    }
+        }
+      } catch (error) {
+        console.error('Error fetching project details or username:', error);
+      }
+    };
+  
+    fetchDetails();
   }, []);
 
   const handleProjectNameChange = (e) => {
     setProjectName(e.target.value);
-  };
-
-  const handleProjectLeadChange = (e) => {
-    setProjectLead(e.target.value);
   };
 
   return (

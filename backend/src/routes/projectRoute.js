@@ -32,19 +32,29 @@ projectRouter.get("/", async (req, res) => {
   }
 });
 
-projectRouter
-  .route("/:project_id")
-  .all(checkProjectIdParam)
-  // Get project
-  .get(async (req, res) => {
-    try {
-      const project = await Project.findById(req.params.project_id);
+// Get project by ID
+projectRouter.get("/:project_id", async (req, res) => {
+  const { project_id } = req.params;
 
-      res.status(200).json({ project });
-    } catch (err) {
-      res.status(500).json({ message: err.message });
+  if (!mongoose.Types.ObjectId.isValid(project_id)) {
+    console.error("Valid Project ID is required.");
+    return res.status(400).json({ error: "Valid Project ID is required." });
+  }
+
+  try {
+    const project = await Project.findById(project_id);
+
+    if (!project) {
+      console.error("Project not found.");
+      return res.status(404).json({ error: "Project not found." });
     }
-  })
+
+    res.status(200).json({ project });
+  } catch (err) {
+    console.error("Error fetching project:", err);
+    res.status(500).json({ error: "Internal server error." });
+  }
+});
 
 // Get project ID based on user ID
 projectRouter.get("/user/:user_id", async (req, res) => {
