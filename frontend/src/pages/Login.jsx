@@ -1,31 +1,60 @@
 import { useState } from "react";
 import { logo_title,Foambg,logo_blue } from "../assets";
 import { FaArrowRightToBracket } from "react-icons/fa6";
-import { HiArrowRightCircle } from 'react-icons/hi2'
 
-function loginUser(email, password) {
-	fetch(`${import.meta.env.VITE_BACK_END_URL}/auth/login`, {
-		method: "POST",
-		headers: {
-			"Content-Type": "application/json",
-		},
-		body: JSON.stringify({
-			email,
-			password,
-		}),
-		mode: "cors",
-	})
-		.then((res) => res.json())
-		.then((data) => {
-			if (data.token) {
-				document.cookie = `token=${data.token}; max-age=${60 * 60 * 24 * 7}`;
-				window.location.href = `/dashboard?userid=${data.user._id}`; // TODO: change redirect to /dashboard
-				console.log(`token:${data.token}`)
-			} else {
-				console.log(data.error);
-			}
-		})
-		.catch((err) => console.error(err));
+async function fetchProjectID(token, userID) {
+  try {
+    const response = await fetch(`${import.meta.env.VITE_BACK_END_URL}/project/user/${userID}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    if (response.ok) {
+      const data = await response.json();
+      return {
+        projectID: data.projectID,
+        projectName: data.projectName
+      };
+    } else {
+      throw new Error('Failed to fetch projectID');
+    }
+  } catch (error) {
+    console.error('Error fetching projectID:', error);
+    throw error;
+  }
+}
+
+async function loginUser(email, password) {
+  try {
+    const response = await fetch(`${import.meta.env.VITE_BACK_END_URL}/auth/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email,
+        password,
+      }),
+      mode: "cors",
+    });
+
+    const data = await response.json();
+
+    if (data.token) {
+      document.cookie = `token=${data.token}; max-age=${60 * 60 * 24 * 7}`;
+      const projectData = await fetchProjectID(data.token, data.user._id);
+      console.log("project ID:", projectData.projectID);
+      console.log("token:", data.token);
+
+      // TODO: change redirect to /dashboard
+      window.location.href = `/dashboard?userid=${data.user._id}&projectid=${projectData.projectID}`;
+    } else {
+      console.log(data.error);
+    }
+  } catch (error) {
+    console.error("Error during login:", error);
+  }
 }
 
 const Login = () => {
