@@ -287,28 +287,4 @@ projectRouter.get("/all/:user_id", async (req, res) => {
   }
 });
 
-// Get projects based on admin user
-projectRouter.get("/admin/:user_id", async (req, res) => {
-  const { user_id } = req.params;
-
-  if (!mongoose.Types.ObjectId.isValid(user_id)) {
-    console.error("Valid User ID is required.");
-    return res.status(400).json({ error: "Valid User ID is required." });
-  }
-
-  try {
-    const projects = await Project.find({ admin: user_id }).exec();
-
-    if (!projects.length) {
-      console.error("Projects not found.");
-      return res.status(404).json({ error: "Projects not found." });
-    }
-
-    res.status(200).json({ projects });
-  } catch (err) {
-    console.error("Error fetching projects:", err);
-    res.status(500).json({ error: "Internal server error." });
-  }
-});
-
 export default projectRouter;
