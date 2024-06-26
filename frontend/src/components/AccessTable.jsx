@@ -184,12 +184,12 @@ const AccessTable = () => {
       const token = getCookie('token');
       const urlParams = new URLSearchParams(window.location.search);
       const userID = urlParams.get('userid');
+      const projectID = urlParams.get('projectid');
 
       if (token && userID) {
         try {
-          const data = await fetchProjectID(token, userID);
-          setProjectId(data.projectID);
-          const project = await fetchProject(token, data.projectID);
+          setProjectId(projectID);
+          const project = await fetchProject(token, projectID);
           const allUsers = await parseUserDetails(project, token);
           setUsers(allUsers);
         } catch (error) {
