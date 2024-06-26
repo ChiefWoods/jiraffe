@@ -42,10 +42,11 @@ async function getProjectByAdmin(userId) {
 const DashboardLink = () => {
   const searchParams = new URLSearchParams(window.location.search);
   const userId = searchParams.get('userid');
+  const projectId = searchParams.get('projectid');
 
   const navigateToDashboard = (e) => {
     e.preventDefault();
-    window.location.href = `/dashboard?userid=${userId}`;
+    window.location.href = `/dashboard?userid=${userId}&projectid=${projectId}`;
   }
 
   return (

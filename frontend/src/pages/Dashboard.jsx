@@ -100,10 +100,11 @@ async function deleteTask(token,taskID){
 const SettingsLink = () => {
   const searchParams = new URLSearchParams(location.search);
   const userId = searchParams.get('userid');
+  const projectId = searchParams.get('projectid');
 
   const navigateToSettings = (e) => {
     e.preventDefault();
-    window.location.href = `/settings?userid=${userId}`;
+    window.location.href = `/settings?userid=${userId}&projectid=${projectId}`;
   };
 
   return (
