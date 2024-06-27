@@ -5,7 +5,6 @@ const taskSchema = mongoose.Schema(
     project_id: {
       type: String,
       required: true,
-      unique: true,
       ref: "Project",
     },
     name: {
@@ -20,10 +19,13 @@ const taskSchema = mongoose.Schema(
       enum: ["TO DO", "IN PROGRESS", "DONE"],
       default: "TO DO",
     },
-    assignee: {
-      type: String,
-      ref: "User",
-    },
+    assignee: [
+      {
+        type:mongoose.Schema.Types.ObjectId,
+        required:true,
+        ref:"User"
+      }
+    ],
   },
   {
     timestamps: true,

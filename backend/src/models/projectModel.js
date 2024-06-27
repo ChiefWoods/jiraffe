@@ -6,18 +6,19 @@ const projectSchema = mongoose.Schema(
       type: String,
       required: true,
     },
-    admin: {
-      type: mongoose.Schema.Types.ObjectId,
-      required: true,
-      ref: "User",
-    },
-    member: [
+    admin: 
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    
+    members: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
       },
     ],
-    viewer: [
+    viewers: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
