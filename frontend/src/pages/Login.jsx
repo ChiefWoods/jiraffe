@@ -13,8 +13,8 @@ async function fetchProjectID(token, userID) {
     if (response.ok) {
       const data = await response.json();
       return {
-        projectID: data.projectID,
-        projectName: data.projectName
+        projectID: data._id,
+        projectName: data.name
       };
     } else {
 		console.log(data.projectID)

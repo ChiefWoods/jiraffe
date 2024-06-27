@@ -47,7 +47,7 @@ async function fetchProject(token, userID) {
       const data = await response.json();
       return {
         projectID: data._id,
-        projectName: data.names,
+        projectName: data.name,
         projectAdmin:data.admins,
         projectMembers:data.members,
         projectViewers:data.viewers
