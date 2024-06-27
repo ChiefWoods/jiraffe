@@ -157,6 +157,7 @@ const Dashboard = () => {
         const projectDetails = await fetchProject(token, userID);
         const { projectID, projectName, projectMembers, projectViewers, projectAdmin } = projectDetails;
         setProjectID(projectID);
+        console.log(projectID);
         setProjectName(projectName);
         setprojectMembers(projectMembers);
         setprojectViewers(projectViewers);
@@ -188,7 +189,7 @@ const Dashboard = () => {
     fetchData();
   }, []);
 
-  const assignees=[...projectMembers,...projectViewers,...projectAdmin]
+  const assignees=[...projectMembers,...projectViewers]
   const getAssigneeNames=(assigneeIDs)=>{
     return assigneeIDs.map(id=> userMapping[id] || id)
   }

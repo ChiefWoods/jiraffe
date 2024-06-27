@@ -17,6 +17,7 @@ async function fetchProjectID(token, userID) {
         projectName: data.projectName
       };
     } else {
+		console.log(data.projectID)
       throw new Error('Failed to fetch projectID');
     }
   } catch (error) {
