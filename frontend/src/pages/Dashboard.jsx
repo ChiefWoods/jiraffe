@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Navbar, Lane,AddCard  } from '../components';
+import { Navbar, Lane,AddCard, TaskCard  } from '../components';
 import { IoIosSettings } from "react-icons/io";
+import Select from 'react-select'
 import { FaTasks } from "react-icons/fa";
 
 function getCookie(name) {
@@ -34,7 +35,7 @@ async function fetchUsername(token, userID) {
   }
 }
 
-async function fetchProjectID(token, userID) {
+async function fetchProject(token, userID) {
   try {
     const response = await fetch(`${import.meta.env.VITE_BACK_END_URL}/project/user/${userID}`, {
       method: 'GET',
@@ -45,8 +46,11 @@ async function fetchProjectID(token, userID) {
     if (response.ok) {
       const data = await response.json();
       return {
-        projectID: data.projectID,
-        projectName: data.projectName
+        projectID: data._id,
+        projectName: data.names,
+        projectAdmin:data.admins,
+        projectMembers:data.members,
+        projectViewers:data.viewers
       }; // Assuming the response provides project ID and name
     } else {
       throw new Error('Failed to fetch projectid');
@@ -121,13 +125,19 @@ const Dashboard = () => {
   const [username, setUsername] = useState(null);
   const [projectID, setProjectID] = useState(null);
   const [projectName, setProjectName] = useState(null);
+  const [projectMembers, setprojectMembers] = useState([]);
+  const [projectViewers, setprojectViewers] = useState([]);
+  const [projectAdmin, setprojectAdmin] = useState([]);
   const [tasks, setTasks] = useState([]);
-  const [isAddCardOpen, setIsAddCardOpen] = useState(false); // State to control the modal
+  const [isTaskCardOpen, setisTaskCardOpen] = useState(false);
+  const [isAddCardOpen, setisAddCardOpen] = useState(false); // State to control the modal
+  const [selectedTask,setSelectedTask]=useState(null); //state to manage selected task
+  const [isEditing,setisEditing]=useState(false)
 
   const rolesArray = ["Viewer", "Member", "Admin"];
 
   const toggleAddCard = () => {
-    setIsAddCardOpen(!isAddCardOpen); // Toggle the state to open or close the modal
+    setisAddCardOpen(!isAddCardOpen); // Toggle the state to open or close the modal
   };
 
   useEffect(() => {
@@ -144,11 +154,15 @@ const Dashboard = () => {
           console.error('Error fetching username:', error);
         });
 
-      fetchProjectID(token, userID)
+      fetchProject(token, userID)
         .then(projectDetails => {
-          const { projectID, projectName } = projectDetails;
+          const { projectID, projectName,projectMembers,projectViewers,projectAdmin } = projectDetails;
           setProjectID(projectID);
           setProjectName(projectName);
+          setprojectMembers(projectMembers)
+          setprojectViewers(projectMembers)
+          setprojectAdmin(projectAdmin);
+          console.log(projectMembers);
           console.log(projectID)
           if (projectID) {
             return fetchTasks(token, projectID);
@@ -165,6 +179,8 @@ const Dashboard = () => {
     }
   }, []);
 
+  const assignees=[...projectMembers,...projectViewers,...projectAdmin]
+
   const handleDeleteTask=async(taskID)=>{
     try{
       const token=getCookie('token');
@@ -180,6 +196,28 @@ const Dashboard = () => {
     }
   }
 
+  const handleTaskClick=(task)=>{
+    setSelectedTask(task);
+    setisEditing(true);
+    setisTaskCardOpen(true);
+  };
+
+  const handleAddTaskClick=(laneName)=>{
+    console.log('handleaddtask clicked')
+    setSelectedTask({
+      status:laneName
+    });
+    console.log(selectedTask);
+    setisEditing(false);
+    setisTaskCardOpen(true);
+    console.log(isTaskCardOpen)
+  }
+
+  const closeTaskCard=()=>{
+    setSelectedTask(null);
+    setisTaskCardOpen(false);
+  }
+
   const swimlanes = [
     { name: 'TO DO', icon: 'box', bgcolor: '#DEDCFF', strokecolor: '#81ACFF', textcolor: '#0046AF' },
     { name: 'IN PROGRESS', icon: 'time', bgcolor: '#FFF6EB', strokecolor: '#FFE4C2', textcolor: '#8F4F00' },
@@ -191,7 +229,7 @@ const Dashboard = () => {
       <Navbar />
       <div className="w-[100%] px-10 py-5">
         <div className="mr-[20px] mt-5 flex flex-row justify-between">
-          <p className="text-[#0052CC] text-[33px] font-semibold">online-task-mgmt-tool</p>
+          <p className="text-[#0052CC] text-[33px] font-semibold">{projectName}</p>
           <div className='flex flex-row'>
             <SettingsLink />
             <button className="border-[#0052CC] border-2 bg-white text-[#0052CC] hover:bg-[#0052CC] hover:text-white flex flex-row items-center group" onClick={toggleAddCard}>
@@ -200,20 +238,24 @@ const Dashboard = () => {
             </button>
           </div>
         </div>
-        <div className='ml-[20px] mt-[10px] items-center'>
-          <p className='text-[#0052CC] text-[28px] font-semibold'>{projectName}</p>
-          <div className='w-fit py-2 px-3 mt-[20px] rounded-3xl border-2 border-[#0052CC]'>
-            <p className='flex flex-row text-[28px] font-semibold ml-[5px] text-[#0052CC]'><FaTasks className='mr-[5px]' />Task List</p>
-          </div>
-        </div>
 
         <div className="flex flex-row w-[80%] mt-6">
           {swimlanes.map((swimlane, index) => (
-            <Lane key={index} lane={swimlane} tasks={tasks.filter(task => task.status === swimlane.name)} onDeleteTask={handleDeleteTask} />
+            <Lane key={index} lane={swimlane} tasks={tasks.filter(task => task.status === swimlane.name)} onDeleteTask={handleDeleteTask} onTaskClick={handleTaskClick} onAddTaskClick={handleAddTaskClick}/>
           ))}
         </div>
 
         <AddCard isOpen={isAddCardOpen} onClose={toggleAddCard} />
+        
+        {selectedTask && (
+          <TaskCard
+          task={selectedTask}
+          isEditing={isEditing}
+          taskStatusOptions={['TO DO', 'IN PROGRESS', 'DONE']}
+          onClose={closeTaskCard}
+          availableAssignees={assignees}
+          />
+        )}
       </div>
     </div>
   );
