@@ -132,6 +132,8 @@ const Dashboard = () => {
   const [isAddCardOpen, setisAddCardOpen] = useState(false); // State to control the modal
   const [selectedTask,setSelectedTask]=useState(null); //state to manage selected task
   const [isEditing,setisEditing]=useState(false)
+  const [userMapping, setUserMapping] = useState({});
+
 
   const rolesArray = ["Viewer", "Member", "Admin"];
 
@@ -140,45 +142,56 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
-    const token = getCookie('token'); // Get token from cookies or local storage
+    const token = getCookie('token');
     const urlParams = new URLSearchParams(window.location.search);
-    const userID = urlParams.get('userid'); // Get user_id from URL query parameter
-
-    if (token && userID) {
-      fetchUsername(token, userID)
-        .then(username => {
-          setUsername(username);
-        })
-        .catch(error => {
-          console.error('Error fetching username:', error);
-        });
-
-      fetchProject(token, userID)
-        .then(projectDetails => {
-          const { projectID, projectName,projectMembers,projectViewers,projectAdmin } = projectDetails;
-          setProjectID(projectID);
-          setProjectName(projectName);
-          setprojectMembers(projectMembers)
-          setprojectViewers(projectMembers)
-          setprojectAdmin(projectAdmin);
-          console.log(projectMembers);
-          console.log(projectID)
-          if (projectID) {
-            return fetchTasks(token, projectID);
-          } else {
-            throw new Error('No project ID found');
-          }
-        })
-        .then(tasks => {
+    const userID = urlParams.get('userid');
+  
+    const fetchData = async () => {
+      try {
+        // Fetch username
+        const username = await fetchUsername(token, userID);
+        setUsername(username);
+  
+        // Fetch project details
+        const projectDetails = await fetchProject(token, userID);
+        const { projectID, projectName, projectMembers, projectViewers, projectAdmin } = projectDetails;
+        setProjectID(projectID);
+        setProjectName(projectName);
+        setprojectMembers(projectMembers);
+        setprojectViewers(projectViewers);
+        setprojectAdmin(projectAdmin);
+  
+        // Fetch tasks
+        if (projectID) {
+          const tasks = await fetchTasks(token, projectID);
           setTasks(tasks);
-        })
-        .catch(error => {
-          console.error('Error fetching project or tasks:', error);
+        } else {
+          throw new Error('No project ID found');
+        }
+  
+        // Fetch assignee names (users)
+        const response = await fetch(`${import.meta.env.VITE_BACK_END_URL}/user`);
+        const data = await response.json();
+  
+        const mapping = {};
+        data.users.forEach(user => {
+          mapping[user._id] = user.name;
         });
-    }
+        setUserMapping(mapping);
+  
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+  
+    fetchData();
   }, []);
 
   const assignees=[...projectMembers,...projectViewers,...projectAdmin]
+  const getAssigneeNames=(assigneeIDs)=>{
+    return assigneeIDs.map(id=> userMapping[id] || id)
+  }
+ 
 
   const handleDeleteTask=async(taskID)=>{
     try{
@@ -252,7 +265,7 @@ const Dashboard = () => {
           isEditing={isEditing}
           taskStatusOptions={['TO DO', 'IN PROGRESS', 'DONE']}
           onClose={closeTaskCard}
-          availableAssignees={assignees}
+          availableAssignees={getAssigneeNames(assignees)}
           />
         )}
       </div>

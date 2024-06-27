@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Select from 'react-select';
-import { MdOutlineClose } from "react-icons/md";
+import { MdOutlineClose } from 'react-icons/md';
 
 const TaskCard = ({ task, isEditing, taskStatusOptions, onClose, availableAssignees }) => {
   const [taskTitle, setTaskTitle] = useState('');
@@ -37,7 +37,7 @@ const TaskCard = ({ task, isEditing, taskStatusOptions, onClose, availableAssign
     setAssignees(selectedOptions ? selectedOptions.map(option => option.value) : []);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const taskData = {
       name: taskTitle,
       status: taskStatus,
@@ -46,12 +46,21 @@ const TaskCard = ({ task, isEditing, taskStatusOptions, onClose, availableAssign
       assignees: assignees
     };
 
-    if (isEditing) {
-      // Implement update task logic here
-    } else {
-      // Implement add new task logic here
+    const requestOptions = {
+      method: isEditing ? 'PUT' : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(taskData)
+    };
+
+    try {
+      const response = await fetch(`${import.meta.env.VITE_BACK_END_URL}/task${isEditing ? `/${task.id}` : ''}`, requestOptions);
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      onClose();
+    } catch (error) {
+      console.error('Error saving task:', error);
     }
-    onClose();
   };
 
   const formatDate = (dateString) => {
@@ -66,74 +75,85 @@ const TaskCard = ({ task, isEditing, taskStatusOptions, onClose, availableAssign
   return (
     <div className='z-40 fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50'>
       <div className='border-2 mx-auto bg-white px-12 py-6 rounded-md shadow-md flex flex-col w-[50%] h-[65%] max-w-full relative z-50'>
-        <div className='justify-between flex flex-row h-[90%]'>
-          <div className={` ${isEditing?'w-[80%]':'w-[100%]'}`}>
-            <div>
-              <h2></h2>
+        <form>
+          <div className='justify-between flex flex-row h-[90%]'>
+            <div className={` ${isEditing ? 'w-[80%]' : 'w-[100%]'}`}>
+              <div className=''>
+                <h2 className='text-[30px] font-semibold mb-2 text-[#0052CC]'>{isEditing ? 'Edit Task' : 'Add Task'}</h2>
+                <p className='font-semibold mb-2'>Task Name:</p>
+                <input
+                  type='text'
+                  className='text-sm w-full p-2 mb-2 bg-[#ffffff] border-2 text-black focus:outline-none focus:ring-2 focus:ring-blue-500 rounded'
+                  placeholder='Task title...'
+                  value={taskTitle}
+                  onChange={(e) => setTaskTitle(e.target.value)}
+                />
+                <div className='mb-2'>
+                  <p className='font-semibold mb-2'>Task Progress:</p>
+                  <Select
+                    options={statusOptions}
+                    value={statusOptions.find(option => option.value === taskStatus)}
+                    onChange={handleStatusChange}
+                    className='basic-single'
+                    classNamePrefix='select'
+                    placeholder='Select...'
+                  />
+                </div>
+                <div>
+                  <p className='font-semibold mb-2'>Assignee:</p>
+                  <Select
+                    isMulti
+                    options={assigneeOptions}
+                    value={assigneeOptions.filter(option => assignees.includes(option.value))}
+                    onChange={handleAssigneeChange}
+                    className='basic-multi-select mb-4'
+                    classNamePrefix='select'
+                  />
+                </div>
+              </div>
+              <div className='mb-4'>
+                <p className='font-semibold'>Description:</p>
+                <textarea
+                  type='text'
+                  className='text-sm w-full p-2 bg-[#ffffff] border-2 text-black focus:outline-none focus:ring-2 focus:ring-blue-500 rounded resize-none overflow-hidden'
+                  placeholder='Add a description...'
+                  value={taskDescription}
+                  onChange={handleDescriptionChange}
+                />
+              </div>
             </div>
-            <div className='mb-6'>
-              <h2 className='text-[30px] font-semibold mb-2 text-[#0052CC]'>{isEditing ? 'Edit Task' : 'Add Task'}</h2>
-              <p className='font-semibold mb-2'>Task Name:</p>
-              <input
-                type='text'
-                className='text-sm w-full p-2 mb-4 bg-[#ffffff] border-2 text-black focus:outline-none focus:ring-2 focus:ring-blue-500 rounded'
-                placeholder='Task title...'
-                value={taskTitle}
-                onChange={(e) => setTaskTitle(e.target.value)}
-              />
-              <p className='font-semibold mb-2'>Task Progress:</p>
-              <Select
-                options={statusOptions}
-                value={statusOptions.find(option => option.value === taskStatus)}
-                onChange={handleStatusChange}
-                className='basic-single'
-                classNamePrefix='select'
-                placeholder="Select..."
-              />
-
-<div>
-              <p className=' text-gray-700 font-semibold'>Assignee:</p>
-              <Select
-                isMulti
-                options={assigneeOptions}
-                value={assigneeOptions.filter(option => assignees.includes(option.value))}
-                onChange={handleAssigneeChange}
-                className='basic-multi-select'
-                classNamePrefix='select'
-                
-              />
-            </div>
-            </div>
-            <div className='mb-4'>
-              <p className='font-semibold'>Description:</p>
-              <textarea
-                type='text'
-                className='text-sm w-full h-[200px] p-2 bg-[#ffffff] border-2 text-black focus:outline-none focus:ring-2 focus:ring-blue-500 rounded resize-none overflow-hidden'
-                placeholder='Add a description...'
-                value={taskDescription}
-                onChange={handleDescriptionChange}
-              />
+            {isEditing && (
+              <div className='mt-6 mr-6 '>
+                <div className='mb-4'>
+                  <p className='text-gray-700 font-semibold'>Created:</p>
+                  <p className='text-sm text-gray-500'>{dateCreated ? formatDate(dateCreated) : 'N/A'}</p>
+                </div>
+              </div>
+            )}
+          </div>
+          <div className={` ${isEditing ? 'w-[80%]' : 'w-[100%]'}`}>
+            <div className='float-end'>
+              <button
+                type='button'
+                className='bg-slate-400 hover:bg-slate-500 text-white py-2 px-4 rounded-md'
+                onClick={onClose}
+              >
+                Cancel
+              </button>
+              <button
+                type='button'
+                className='bg-blue-600 hover:bg-[#0052CC] text-white py-2 px-4 rounded-md ml-3'
+                onClick={handleSave}
+              >
+                {isEditing ? 'Done' : 'Add'}
+              </button>
             </div>
           </div>
-          {isEditing && (
-            <div className='mt-6 mr-6 '>
-            <div className='mb-4'>
-              <p className='text-gray-700 font-semibold'>Created:</p>
-              <p className='text-sm text-gray-500'>{dateCreated ? formatDate(dateCreated) : 'N/A'}</p>
-            </div>
-          </div>
-          )}
-          
-        </div>
-        <div className={` ${isEditing?'w-[80%]':'w-[100%]'}`}>
-          <div className='float-end mt-4 '>
-          <button className='bg-slate-400 hover:bg-slate-500 text-white py-2 px-4 rounded-md' onClick={onClose}>Cancel</button>
-          <button className='bg-blue-600 hover:bg-[#0052CC] text-white py-2 px-4 rounded-md ml-3' onClick={handleSave}>{isEditing ? 'Done' : 'Add'}</button>
-          </div>
-        </div>
-        
-        
-        <MdOutlineClose className='absolute top-4 right-4 font-bold text-slate-400 hover:text-slate-500 text-[35px] cursor-pointer' onClick={onClose} />
+        </form>
+        <MdOutlineClose
+          className='absolute top-4 right-4 font-bold text-slate-400 hover:text-slate-500 text-[35px] cursor-pointer'
+          onClick={onClose}
+        />
       </div>
     </div>
   );
