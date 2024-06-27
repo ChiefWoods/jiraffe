@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import {
   AddCard,
-  EditUserCard
+  EditUserCard,
+  SuccessToast
 } from '../components';
 
 // Sample data
@@ -124,6 +125,7 @@ const AccessTable = () => {
   const [projectId, setProjectId] = useState(null);
   const [isEditCardOpen, setIsEditCardOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [showToast, setShowToast] = useState(false);
 
   const toggleAddCard = () => {
     setIsAddCardOpen(!isAddCardOpen);
@@ -143,7 +145,7 @@ const AccessTable = () => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ user_id: userId, role: newRole.toLowerCase() }) // Ensure role is lowercase
+        body: JSON.stringify({ user_id: userId, role: newRole.toLowerCase() })
       });
       if (response.ok) {
         setUsers(users.map(user => user.id === userId ? { ...user, role: newRole } : user));
@@ -202,7 +204,27 @@ const AccessTable = () => {
     };
 
     fetchData();
+
+    // Check localStorage for the showToast flag
+    if (localStorage.getItem('showToast') === 'true') {
+      setShowToast(true);
+      localStorage.removeItem('showToast');
+    }
   }, []);
+
+  useEffect(() => {
+    if (showToast) {
+      const timer = setTimeout(() => {
+        setShowToast(false);
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [showToast]);
+
+  const handleAddSuccess = () => {
+    setIsAddCardOpen(false);
+    window.location.reload();
+  };
 
   return (
     <div className='mt-12 flex flex-col'>
@@ -244,9 +266,8 @@ const AccessTable = () => {
           ))}
         </tbody>
       </table>
-      {/* Add Card */}
-      <AddCard isOpen={isAddCardOpen} onClose={toggleAddCard} projectId={projectId} />
-      {/* Edit Card */}
+      {showToast && <SuccessToast message="User added successfully" />}
+      <AddCard isOpen={isAddCardOpen} onClose={toggleAddCard} projectId={projectId} onSuccess={handleAddSuccess} />
       {isEditCardOpen && selectedUser && (
         <EditUserCard
           isOpen={isEditCardOpen}
