@@ -45,6 +45,7 @@ async function loginUser(email, password) {
     if (data.token) {
       document.cookie = `token=${data.token}; max-age=${60 * 60 * 24 * 7}`;
       const projectData = await fetchProjectID(data.token, data.user._id);
+      console.log(projectData)
       console.log("project ID:", projectData.projectID);
       console.log("token:", data.token);
 
