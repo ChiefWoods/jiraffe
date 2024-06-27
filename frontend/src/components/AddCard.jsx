@@ -42,7 +42,7 @@ async function addUserToProject(projectId, userId, userRole) {
     });
 
     if (response.ok) {
-      console.log('User added to project');
+      return 'User added to project';
     } else {
       const data = await response.json();
       console.error(data.message);
@@ -52,7 +52,7 @@ async function addUserToProject(projectId, userId, userRole) {
   }
 }
 
-const AddCard = ({ isOpen, onClose, projectId }) => {
+const AddCard = ({ isOpen, onClose, projectId, onSuccess }) => {
   const [allUsers, setAllUsers] = useState([]);
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("Viewer");
@@ -70,12 +70,16 @@ const AddCard = ({ isOpen, onClose, projectId }) => {
     }
   }, [isOpen]);
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     const emails = gatherAllEmails(allUsers);
     const userId = emails[email];
     if (userId) {
-      addUserToProject(projectId, userId, role.toLowerCase());
+      const message = await addUserToProject(projectId, userId, role.toLowerCase());
+      if (message) {
+        localStorage.setItem('showAddUserToast', 'true');
+        onSuccess(); // Notify parent component
+      }
     } else {
       console.error('Email not found');
     }

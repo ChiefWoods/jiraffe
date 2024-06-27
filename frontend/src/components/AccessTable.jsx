@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import {
   AddCard,
-  EditUserCard
+  EditUserCard,
+  SuccessToast
 } from '../components';
 
 // Sample data
@@ -124,6 +125,7 @@ const AccessTable = () => {
   const [projectId, setProjectId] = useState(null);
   const [isEditCardOpen, setIsEditCardOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [showToast, setShowToast] = useState(false);
 
   const toggleAddCard = () => {
     setIsAddCardOpen(!isAddCardOpen);
@@ -143,7 +145,7 @@ const AccessTable = () => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ user_id: userId, role: newRole.toLowerCase() }) // Ensure role is lowercase
+        body: JSON.stringify({ user_id: userId, role: newRole.toLowerCase() })
       });
       if (response.ok) {
         setUsers(users.map(user => user.id === userId ? { ...user, role: newRole } : user));
@@ -184,12 +186,12 @@ const AccessTable = () => {
       const token = getCookie('token');
       const urlParams = new URLSearchParams(window.location.search);
       const userID = urlParams.get('userid');
+      const projectID = urlParams.get('projectid');
 
       if (token && userID) {
         try {
-          const data = await fetchProjectID(token, userID);
-          setProjectId(data.projectID);
-          const project = await fetchProject(token, data.projectID);
+          setProjectId(projectID);
+          const project = await fetchProject(token, projectID);
           const allUsers = await parseUserDetails(project, token);
           setUsers(allUsers);
         } catch (error) {
@@ -202,51 +204,78 @@ const AccessTable = () => {
     };
 
     fetchData();
+
+    // Check localStorage for the showToast flag
+    if (localStorage.getItem('showAddUserToast') === 'true') {
+      setShowToast(true);
+      localStorage.removeItem('showAddUserToast');
+    }
   }, []);
 
+  useEffect(() => {
+    if (showToast) {
+      const timer = setTimeout(() => {
+        setShowToast(false);
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [showToast]);
+
+  const handleAddSuccess = () => {
+    setIsAddCardOpen(false);
+    window.location.reload();
+  };
+
+  const renderActions = (user) => {
+    if (user.role !== 'Admin') {
+      return (
+        <>
+          <button className='bg-gray-100 text-blue-700 mr-2 hover:scale-105 px-4 py-2' onClick={() => toggleEditCard(user)}>✏️</button>
+          <button
+            className='bg-gray-100 text-red-700 hover:scale-105 px-4 py-2'
+            onClick={() => deleteUser(user.id)}
+          >🗑️</button>
+        </>
+      );
+    } else {
+      return (
+        <p className='mr-2 p-[20px]'> </p>
+      );
+    }
+  }
+
   return (
-    <div className='mt-12 flex flex-col'>
+    <div className='mt-8 flex flex-col'>
       <div className='flex mt-8 ml-2 justify-between w-[930px]'>
         <p className='font-bold text-3xl text-blue-700 mb-8'>Access</p>
-        <button className='bg-blue-700 text-white w-[100px] p-0 rounded h-[30px] text-sm' onClick={toggleAddCard}>Add User</button>
+        <button className='bg-blue-700 text-white w-[110px] p-0 rounded h-[34px] text-base hover:scale-105' onClick={toggleAddCard}>Add User</button>
       </div>
-      <table className='w-[1110px] table-auto border-collapse'>
+      <table className='w-[1110px] table-auto border-collapse ml-4'>
         <thead>
           <tr>
-            <th className='text-left'>Name</th>
-            <th className='text-left'>Email</th>
-            <th className='text-left'>Role</th>
-            <th className='text-left'>Actions</th>
+            <th className='text-left w-[140px] pb-[10px]'>Name</th>
+            <th className='text-left w-[190px] pb-[10px]'>Email</th>
+            <th className='text-left w-[130px] pb-[10px]'>Role</th>
+            <th className='text-left w-[170px] pb-[10px]'>Actions</th>
           </tr>
         </thead>
         <tbody>
           {users.map((user, index) => (
             <tr key={index}>
-              <td className='py-2'>{user.name}</td>
-              <td className='py-2'>{user.email}</td>
-              <td className='py-2'>
+              <td className='py-2 w-[140px]'>{user.name}</td>
+              <td className='py-2 w-[190px]'>{user.email}</td>
+              <td className='py-2 w-[130px]'>
                 <span className={roleStyles[user.role]}>{user.role}</span>
               </td>
-              <td className='py-2'>
-                {user.role !== 'Admin' && (
-                  <>
-                    <button className='bg-gray-100 text-blue-700 mr-2' onClick={() => toggleEditCard(user)}>✏️</button>
-                    <button
-                      className='bg-gray-100 text-red-700'
-                      onClick={() => deleteUser(user.id)}
-                    >
-                      🗑️
-                    </button>
-                  </>
-                )}
+              <td className='py-2 w-[170px]'>
+                {renderActions(user)}
               </td>
             </tr>
           ))}
         </tbody>
       </table>
-      {/* Add Card */}
-      <AddCard isOpen={isAddCardOpen} onClose={toggleAddCard} projectId={projectId} />
-      {/* Edit Card */}
+      {showToast && <SuccessToast message="User added successfully" />}
+      <AddCard isOpen={isAddCardOpen} onClose={toggleAddCard} projectId={projectId} onSuccess={handleAddSuccess} />
       {isEditCardOpen && selectedUser && (
         <EditUserCard
           isOpen={isEditCardOpen}
@@ -256,7 +285,7 @@ const AccessTable = () => {
         />
       )}
     </div>
-  );
+  );  
 };
 
 export default AccessTable;

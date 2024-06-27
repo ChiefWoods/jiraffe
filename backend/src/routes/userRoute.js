@@ -69,9 +69,16 @@ userRouter.get("/userdetails/:user_id", async (req, res) => {
 userRouter.get("/", async (req, res) => {
   try {
     const users = await User.find();
+
+    if (!users) {
+      console.error("No users found");
+      return res.status(404).send({ message: "No users found." });
+    }
+
     res.status(200).json({ users });
   } catch (err) {
-    res.status(500).send({ message: err.message });
+    console.error("Error fetching users", err);
+    res.status(500).send({ error: "Error fetching users" });
   }
 });
 

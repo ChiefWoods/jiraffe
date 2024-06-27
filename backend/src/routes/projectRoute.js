@@ -32,40 +32,52 @@ projectRouter.get("/", async (req, res) => {
   }
 });
 
-projectRouter
-  .route("/:project_id")
-  .all(checkProjectIdParam)
-  // Get project
-  .get(async (req, res) => {
-    try {
-      const project = await Project.findById(req.params.project_id);
+// Get project by ID
+projectRouter.get("/:project_id", async (req, res) => {
+  const { project_id } = req.params;
 
-      res.status(200).json({ project });
-    } catch (err) {
-      res.status(500).json({ message: err.message });
-    }
-  })
-  //Get projectid via userid
-projectRouter.get("/user/:user_id",async(req,res)=>{
-  try{
-    const{user_id}=req.params;
-
-    if (!mongoose.Types.ObjectId.isValid(user_id)) {
-      return res.status(400).json({ error: "Valid User ID is required." });
-    }
-
-    console.log(`Fetching project for userID:${user_id}`);
-
-    const project=await Project.findOne({projectLead:user_id});
-    if(!project){
-      console.error('Project not found');
-      return res.status(404).json({error:'User not found.'});
-    }
-    res.status(200).json(project);
-  }catch(err){
-    res.status(500).json({message:err.message});
+  if (!mongoose.Types.ObjectId.isValid(project_id)) {
+    console.error("Valid Project ID is required.");
+    return res.status(400).json({ error: "Valid Project ID is required." });
   }
-})
+
+  try {
+    const project = await Project.findById(project_id);
+
+    if (!project) {
+      console.error("Project not found.");
+      return res.status(404).json({ error: "Project not found." });
+    }
+
+    res.status(200).json({ project });
+  } catch (err) {
+    console.error("Error fetching project:", err);
+    res.status(500).json({ error: "Internal server error." });
+  }
+});
+
+// Get project ID based on user ID
+projectRouter.get("/user/:user_id", async (req, res) => {
+  const { user_id } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(user_id)) {
+    console.error("Valid User ID is required.");
+    return res.status(400).json({ error: "Valid User ID is required." });
+  }
+
+  try {
+    const project = await Project.findOne({ admin: user_id });
+
+    if (!project) {
+      console.error("Project not found.");
+      return res.status(404).json({ error: "User not found." });
+    }
+
+    res.status(200).json({ projectID: project._id, projectName: project.name });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
 
 // Update project
 projectRouter.put("/:project_id", async (req, res) => {
@@ -260,42 +272,50 @@ projectRouter
   });
 
 // Get all projects based on user_id
-projectRouter.get("/allprojs/:user_id", async (req, res) => {
+projectRouter.get("/all/:user_id", async (req, res) => {
+  const { user_id } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(user_id)) {
+    console.error("Valid User ID is required.");
+    return res.status(400).json({ error: "Valid User ID is required." });
+  }
+
   try {
-    const { user_id } = req.params;
-
-    if (!mongoose.Types.ObjectId.isValid(user_id)) {
-      return res.status(400).json({ error: "Valid User ID is required." });
-    }
-
-    console.log(`Fetching projects for userID: ${user_id}`);
-
     const projects = await Project.find({
       $or: [{ admin: user_id }, { members: user_id }, { viewers: user_id }],
-    });
+    }).exec();
+
+    if (!projects.length) {
+      console.error("Projects not found.");
+      return res.status(404).json({ error: "Projects not found." });
+    }
 
     res.status(200).json({ projects });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error("Error fetching projects:", err);
+    res.status(500).json({ error: "Internal server error." });
   }
 });
 
-// Get project based on user_id, which is the admin of the project
-projectRouter.get("/adminproj/:user_id", async (req, res) => {
-  try {
-    const { user_id } = req.params;
+/**
+ * Get project ID based on project name
+ * @deprecated Currently not in use
+ */
+projectRouter.get("/name/:project_name", async (req, res) => {
+  const { project_name } = req.params;
 
-    if (!mongoose.Types.ObjectId.isValid(user_id)) {
-      return res.status(400).json({ error: "Valid User ID is required." });
+  try {
+    const project = await Project.findOne({ name: project_name });
+
+    if (!project) {
+      console.error("Project not found.");
+      return res.status(404).json({ error: "Project not found." });
     }
 
-    console.log(`Fetching projects for userID: ${user_id}`);
-
-    const projects = await Project.find({ admin: user_id });
-
-    res.status(200).json({ projects });
+    res.status(200).json({ projectID: project._id });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error("Error fetching project:", err);
+    res.status(500).json({ error: "Internal server error." });
   }
 });
 

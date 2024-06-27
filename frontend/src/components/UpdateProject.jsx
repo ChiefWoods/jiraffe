@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { SuccessToast } from '.';
 
 function getCookie(name) {
   const cookies = document.cookie.split(';');
@@ -9,49 +10,6 @@ function getCookie(name) {
     }
   }
   return null;
-}
-
-async function fetchUsername(token, userID) {
-  try {
-    const response = await fetch(`${import.meta.env.VITE_BACK_END_URL}/user/username/${userID}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    });
-    if (response.ok) {
-      const data = await response.json();
-      return data.username; // Assuming the response provides username under 'username'
-    } else {
-      throw new Error('Failed to fetch username');
-    }
-  } catch (error) {
-    console.error('Error fetching username:', error);
-    throw error; // Propagate the error for handling in the calling code
-  }
-}
-
-async function fetchProjectID(token, userID) {
-  try {
-    const response = await fetch(`${import.meta.env.VITE_BACK_END_URL}/project/user/${userID}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    });
-    if (response.ok) {
-      const data = await response.json();
-      return {
-        projectID: data.projectID,
-        projectName: data.projectName
-      }; // Assuming the response provides project ID and name
-    } else {
-      throw new Error('Failed to fetch projectid');
-    }
-  } catch (error) {
-    console.error('Error fetching projectid:', error);
-    throw error; // Propagate the error for handling in the calling code
-  }
 }
 
 async function updateProjectName(projectID, projectName) {
@@ -67,99 +25,159 @@ async function updateProjectName(projectID, projectName) {
     });
 
     if (response.ok) {
-      console.log('Project name updated successfully');
+      return 'Project name updated successfully';
     } else {
       const data = await response.json();
-      console.error(data.message);
+      throw new Error(data.message);
     }
   } catch (error) {
-    console.error('Error updating project name:', error);
+    throw new Error('Error updating project name:', error);
+  }
+}
+
+async function fetchUsername(userID) {
+  try {
+    const response = await fetch(`${import.meta.env.VITE_BACK_END_URL}/user/username/${userID}`, {
+      method: 'GET',
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      return data.username;
+    } else {
+      console.error('Failed to fetch username:', response.statusText);
+      throw new Error('Failed to fetch username');
+    }
+  } catch (error) {
+    console.error('Error fetching username:', error);
+    throw new Error('Error fetching username');
+  }
+}
+
+async function fetchProjectDetails(projectId) {
+  try {
+    const response = await fetch(`${import.meta.env.VITE_BACK_END_URL}/project/${projectId}`, {
+      method: 'GET'
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      return data.project;
+    } else {
+      console.error('Failed to fetch project details:', response.statusText);
+      throw new Error('Failed to fetch project details');
+    }
+  } catch (error) {
+    console.error('Error fetching project details:', error);
+    throw new Error('Error fetching project details');
   }
 }
 
 const UpdateProject = () => {
   const [projectName, setProjectName] = useState('');
   const [projectLead, setProjectLead] = useState('');
+  const [toastMessage, setToastMessage] = useState(null);
+  const [showToast, setShowToast] = useState(false);
 
   function handleSubmit(e) {
     e.preventDefault();
     const token = getCookie('token');
     const urlParams = new URLSearchParams(window.location.search);
     const userID = urlParams.get('userid');
-
+    const projectID = urlParams.get('projectid');
+  
     if (token && userID) {
-      fetchProjectID(token, userID)
-        .then((projectDetails) => {
-          const { projectID } = projectDetails;
-          updateProjectName(projectID, projectName);
+      updateProjectName(projectID, projectName)
+        .then((message) => {
+          // Reload and set flag to show toast
+          window.location.reload();
+          localStorage.setItem('showUpdateProjectToast', 'true');
         })
         .catch((error) => {
-          console.error('Error fetching projectID:', error);
+          console.error('Error updating project name:', error);
         });
     }
   }
-
+  
   useEffect(() => {
-    const token = getCookie('token');
-    const urlParams = new URLSearchParams(window.location.search);
-    const userID = urlParams.get('userid');
-
-    if (token && userID) {
-      fetchUsername(token, userID)
-        .then((username) => {
+    const fetchDetails = async () => {
+      try {
+        const token = getCookie('token');
+        const urlParams = new URLSearchParams(window.location.search);
+        const userID = urlParams.get('userid');
+        const projectID = urlParams.get('projectid');
+  
+        if (token && userID && projectID) {
+          const project = await fetchProjectDetails(projectID);
+          setProjectName(project.name);
+  
+          const username = await fetchUsername(project.admin);
           setProjectLead(username);
-        })
-        .catch((error) => {
-          console.error('Error fetching username:', error);
-        });
-
-      fetchProjectID(token, userID)
-        .then((projectDetails) => {
-          const { projectID, projectName } = projectDetails;
-          setProjectName(projectName);
-        })
-        .catch((error) => {
-          console.error('Error fetching projectID:', error);
-        });
-    }
+  
+          // Check localStorage for the showToast flag
+          if (localStorage.getItem('showUpdateProjectToast') === 'true') {
+            setToastMessage('Project name updated successfully');
+            setShowToast(true);
+            localStorage.removeItem('showUpdateProjectToast');
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching project details or username:', error);
+      }
+    };
+  
+    fetchDetails();
   }, []);
+  
+  // Auto-dismiss toast after 2.5 seconds
+  useEffect(() => {
+    if (showToast) {
+      const timer = setTimeout(() => {
+        setShowToast(false);
+      }, 2500);
+      return () => clearTimeout(timer);
+    }
+  }, [showToast]);
 
   const handleProjectNameChange = (e) => {
     setProjectName(e.target.value);
   };
 
-  const handleProjectLeadChange = (e) => {
-    setProjectLead(e.target.value);
+  const dismissToast = () => {
+    setShowToast(false);
   };
 
   return (
-    <form className='mt-12 flex flex-col' onSubmit={handleSubmit}>
-      <p className='font-bold text-3xl text-blue-700 mb-8'>Project Settings</p>
-      {/* Row */}
-      <div className='flex ml-8'>
-        <div className='flex flex-col mr-8'>
-          <label className='font-semibold text-lg text-black mb-2' htmlFor="project-name">Project Name</label>
-          <input 
-            className='border border-gray-300 w-[440px] p-2 rounded' 
-            type="text" 
-            id="project-name" 
-            name="project-name" 
-            value={projectName}
-            onChange={handleProjectNameChange}
-          />
+    <div className='relative'>
+      <form className='mt-12 flex flex-col' onSubmit={handleSubmit}>
+        <p className='font-bold text-3xl text-blue-700 mb-8'>Project Details</p>
+        {/* Row */}
+        <div className='flex ml-2'>
+          <div className='flex flex-col mr-8'>
+            <label className='font-semibold text-lg text-black mb-2' htmlFor="project-name">Project Name</label>
+            <input 
+              className='border border-gray-300 w-[440px] p-2 rounded' 
+              type="text" 
+              id="project-name" 
+              name="project-name" 
+              value={projectName}
+              onChange={handleProjectNameChange}
+            />
+          </div>
+          <div className='flex flex-col'>
+            <label className='font-semibold text-lg text-black mb-2' htmlFor="project-lead">Project Lead</label>
+            <p className='border border-gray-300 w-[440px] p-2 rounded text-base'>{projectLead}</p>
+          </div>
         </div>
-        <div className='flex flex-col'>
-          <label className='font-semibold text-lg text-black mb-2' htmlFor="project-lead">Project Lead</label>
-          <p className='border border-gray-300 w-[440px] p-2 rounded text-base'>{projectLead}</p>
+        {/* Row */}
+        <div className='flex mt-8 ml-2'>
+          <div className='flex flex-col'>
+            <button className='bg-blue-700 text-white w-[140px] p-2 rounded hover:scale-105'>Save Changes</button>
+          </div>
         </div>
-      </div>
-      {/* Row */}
-      <div className='flex mt-8 ml-8'>
-        <div className='flex flex-col'>
-          <button className='bg-blue-700 text-white w-[140px] p-2 rounded'>Save Changes</button>
-        </div>
-      </div>
-    </form>
+      </form>
+      {showToast && <SuccessToast message={toastMessage} onClose={dismissToast} />}
+    </div>
   );
 };
 

@@ -3,14 +3,16 @@ import {
   Navbar,
   TaskCard,
   AddCard,
-  EditUserCard
+  EditUserCard,
+  SuccessToast,
 } from '../components';
 
 const Test = () => {
   return (
     <div className='flex'>
-      <Navbar />
-      <EditUserCard />
+      {/* <Navbar />
+      <EditUserCard /> */}
+      <SuccessToast message='Success!' onClose={() => {}} />
     </div>
   )
 }
