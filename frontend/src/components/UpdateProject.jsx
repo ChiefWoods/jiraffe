@@ -150,9 +150,9 @@ const UpdateProject = () => {
   return (
     <div className='relative'>
       <form className='mt-12 flex flex-col' onSubmit={handleSubmit}>
-        <p className='font-bold text-3xl text-blue-700 mb-8'>Project Settings</p>
+        <p className='font-bold text-3xl text-blue-700 mb-8'>Project Details</p>
         {/* Row */}
-        <div className='flex ml-8'>
+        <div className='flex ml-2'>
           <div className='flex flex-col mr-8'>
             <label className='font-semibold text-lg text-black mb-2' htmlFor="project-name">Project Name</label>
             <input 
@@ -170,9 +170,9 @@ const UpdateProject = () => {
           </div>
         </div>
         {/* Row */}
-        <div className='flex mt-8 ml-8'>
+        <div className='flex mt-8 ml-2'>
           <div className='flex flex-col'>
-            <button className='bg-blue-700 text-white w-[140px] p-2 rounded'>Save Changes</button>
+            <button className='bg-blue-700 text-white w-[140px] p-2 rounded hover:scale-105'>Save Changes</button>
           </div>
         </div>
       </form>
