@@ -206,9 +206,9 @@ const AccessTable = () => {
     fetchData();
 
     // Check localStorage for the showToast flag
-    if (localStorage.getItem('showToast') === 'true') {
+    if (localStorage.getItem('showAddUserToast') === 'true') {
       setShowToast(true);
-      localStorage.removeItem('showToast');
+      localStorage.removeItem('showAddUserToast');
     }
   }, []);
 

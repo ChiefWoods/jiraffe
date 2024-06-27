@@ -77,7 +77,7 @@ const AddCard = ({ isOpen, onClose, projectId, onSuccess }) => {
     if (userId) {
       const message = await addUserToProject(projectId, userId, role.toLowerCase());
       if (message) {
-        localStorage.setItem('showToast', 'true');
+        localStorage.setItem('showAddUserToast', 'true');
         onSuccess(); // Notify parent component
       }
     } else {

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { logo_blue } from "../assets";
 import { MdDashboard } from "react-icons/md";
 import { IoIosUndo } from "react-icons/io";
+import { SuccessToast } from ".";
 
 async function getProjectsByUserId(userId) {
   try {
@@ -50,11 +51,11 @@ const DashboardLink = () => {
   }
 
   return (
-    <li className="flex items-center mr-2">
+    <li className="flex items-center mr-2 hover:scale-105 tracking-wide">
       <span>
         <MdDashboard className="text-white text-2xl mx-2" />
       </span>
-      <a href="/dashboard" className="text-white hover:underline ml-2" onClick={navigateToDashboard}>
+      <a href="/dashboard" className="text-white hover:text-white ml-2" onClick={navigateToDashboard}>
         Dashboard
       </a>
     </li>
@@ -64,6 +65,7 @@ const DashboardLink = () => {
 const Navbar = () => {
   const [currentProject, setCurrentProject] = useState(null);
   const [projects, setProjects] = useState([]);
+  const [showToast, setShowToast] = useState(false);
 
   function handleLogout(e) {
     e.preventDefault();
@@ -76,6 +78,7 @@ const Navbar = () => {
     const searchParams = new URLSearchParams(window.location.search);
     const userId = searchParams.get('userid');
     window.location.href = `${currentPath}?userid=${userId}&projectid=${projectId}`;
+    localStorage.setItem('showProjectChangedToast', 'true');
   }
 
   useEffect(() => {
@@ -91,6 +94,12 @@ const Navbar = () => {
           
           setCurrentProject(currentProject);
           setProjects(projects.filter(project => project._id !== currentProject._id));
+
+          // Check localStorage for the showToast flag
+          if (localStorage.getItem('showProjectChangedToast') === 'true') {
+            setShowToast(true);
+            localStorage.removeItem('showProjectChangedToast');
+          }
           
         } catch (error) {
           console.error('Error fetching data:', error);
@@ -103,46 +112,62 @@ const Navbar = () => {
     fetchData();
   }, []);
 
+  // Auto-dismiss toast after 2.5 seconds
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowToast(false);
+    }, 2500);
+
+    return () => clearTimeout(timer);
+  }, [showToast]);
+
+  const dismissToast = () => {
+    setShowToast(false);
+  };
+
   return (
-    <div className="z-10 flex flex-col h-screen bg-[#0052CC] w-[230px] top-0 left-0 px-0 py-6">
-      <img src={logo_blue} alt="Logo" className="w-48 mb-4" />
-      <ul className="text-white-500 mx-2 pl-0 ml-2">
-        {currentProject && (
-          <li key={currentProject._id} className={`mb-2 bg-[#0052CC] text-white`}>
-            <button
-              className="block w-full text-left bg-[#0052CC] font-extrabold"
-            >
-              {currentProject.name}
-            </button>
-          </li>
-        )}
-        {projects.map((project, index) => (
-          <li key={index} className={`mb-2 bg-[#0052CC] text-white`}>
-            <button
-              className={`block w-full text-left bg-[#0052CC] ${
-                project === currentProject ? "font-extrabold" : "font-light"
-              }`}
-              onClick={() => navigateToAnotherProject(project._id)}
-            >
-              {project.name}
-            </button>
-          </li>
-        ))}
-      </ul>
-      <div className="flex-grow flex flex-col justify-end mb-6">
-        <ul className="flex flex-col space-y-6 ml-6">
-          <DashboardLink />
-          <li className="flex items-center mr-2">
-            <button className="flex items-center bg-white text-[#0052CC] hover:text-white hover:bg-[#0052CC] ml-1 px-2 py-1 rounded-lg w-[160px] transition-colors duration-300" onClick={handleLogout}>
-              <span>
-                <IoIosUndo className="text-2xl mr-3" />
-              </span>
-              <p>Log Out</p>
-            </button>
-          </li>
+    <>
+      {showToast && <SuccessToast message="Project changed successfully" onClose={dismissToast} />}
+      <div className="z-10 flex flex-col h-screen bg-[#0052CC] w-[230px] top-0 left-0 px-0 py-6">
+        <img src={logo_blue} alt="Logo" className="w-48 mb-4" />
+        <ul className="text-white-500 mx-2 pl-0 ml-2">
+          {currentProject && (
+            <li key={currentProject._id} className="mb-2 bg-[#0052CC] text-white tracking-wide">
+              <button
+                className="block w-full text-left bg-[#0052CC] font-extrabold focus:outline-none"
+              >
+                {currentProject.name}
+              </button>
+            </li>
+          )}
+          {projects.map((project, index) => (
+            <li key={index} className="mb-2 bg-[#0052CC] text-white hover:scale-105 tracking-wide">
+              <button
+                className={`block w-full text-left bg-[#0052CC] ${
+                  project === currentProject ? "font-extrabold" : "font-light"
+                } focus:outline-none`}
+                onClick={() => navigateToAnotherProject(project._id)}
+              >
+                {project.name}
+              </button>
+            </li>
+          ))}
         </ul>
+        <div className="flex-grow flex flex-col justify-end mb-6">
+          <ul className="flex flex-col space-y-4 ml-6">
+            <DashboardLink />
+            <li className="flex items-center mr-2 tracking-wide">
+              <button className="flex items-center bg-white text-[#0052CC] hover:scale-105 ml-1 px-2 py-1 rounded-lg w-[140px] transition-colors duration-300" onClick={handleLogout}>
+                <span>
+                  <IoIosUndo className="text-2xl mr-3" />
+                </span>
+                <p className="text-base font-bold">Log Out</p>
+              </button>
+            </li>
+          </ul>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

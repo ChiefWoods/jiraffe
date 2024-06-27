@@ -91,7 +91,7 @@ const UpdateProject = () => {
         .then((message) => {
           // Reload and set flag to show toast
           window.location.reload();
-          localStorage.setItem('showToast', 'true');
+          localStorage.setItem('showUpdateProjectToast', 'true');
         })
         .catch((error) => {
           console.error('Error updating project name:', error);
@@ -115,10 +115,10 @@ const UpdateProject = () => {
           setProjectLead(username);
   
           // Check localStorage for the showToast flag
-          if (localStorage.getItem('showToast') === 'true') {
+          if (localStorage.getItem('showUpdateProjectToast') === 'true') {
             setToastMessage('Project name updated successfully');
             setShowToast(true);
-            localStorage.removeItem('showToast');
+            localStorage.removeItem('showUpdateProjectToast');
           }
         }
       } catch (error) {
