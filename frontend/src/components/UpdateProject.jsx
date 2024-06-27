@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { SuccessToast } from '.';
 
 function getCookie(name) {
   const cookies = document.cookie.split(';');
@@ -24,13 +25,13 @@ async function updateProjectName(projectID, projectName) {
     });
 
     if (response.ok) {
-      console.log('Project name updated successfully');
+      return 'Project name updated successfully';
     } else {
       const data = await response.json();
-      console.error(data.message);
+      throw new Error(data.message);
     }
   } catch (error) {
-    console.error('Error updating project name:', error);
+    throw new Error('Error updating project name:', error);
   }
 }
 
@@ -75,6 +76,8 @@ async function fetchProjectDetails(projectId) {
 const UpdateProject = () => {
   const [projectName, setProjectName] = useState('');
   const [projectLead, setProjectLead] = useState('');
+  const [toastMessage, setToastMessage] = useState(null);
+  const [showToast, setShowToast] = useState(false);
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -82,18 +85,20 @@ const UpdateProject = () => {
     const urlParams = new URLSearchParams(window.location.search);
     const userID = urlParams.get('userid');
     const projectID = urlParams.get('projectid');
-
+  
     if (token && userID) {
       updateProjectName(projectID, projectName)
-        .then(() => {
-          console.log('Project name updated successfully');
+        .then((message) => {
+          // Reload and set flag to show toast
+          window.location.reload();
+          localStorage.setItem('showToast', 'true');
         })
         .catch((error) => {
           console.error('Error updating project name:', error);
         });
     }
   }
-
+  
   useEffect(() => {
     const fetchDetails = async () => {
       try {
@@ -108,6 +113,13 @@ const UpdateProject = () => {
   
           const username = await fetchUsername(project.admin);
           setProjectLead(username);
+  
+          // Check localStorage for the showToast flag
+          if (localStorage.getItem('showToast') === 'true') {
+            setToastMessage('Project name updated successfully');
+            setShowToast(true);
+            localStorage.removeItem('showToast');
+          }
         }
       } catch (error) {
         console.error('Error fetching project details or username:', error);
@@ -116,39 +128,56 @@ const UpdateProject = () => {
   
     fetchDetails();
   }, []);
+  
+  // Auto-dismiss toast after 2.5 seconds
+  useEffect(() => {
+    if (showToast) {
+      const timer = setTimeout(() => {
+        setShowToast(false);
+      }, 2500);
+      return () => clearTimeout(timer);
+    }
+  }, [showToast]);
 
   const handleProjectNameChange = (e) => {
     setProjectName(e.target.value);
   };
 
+  const dismissToast = () => {
+    setShowToast(false);
+  };
+
   return (
-    <form className='mt-12 flex flex-col' onSubmit={handleSubmit}>
-      <p className='font-bold text-3xl text-blue-700 mb-8'>Project Settings</p>
-      {/* Row */}
-      <div className='flex ml-8'>
-        <div className='flex flex-col mr-8'>
-          <label className='font-semibold text-lg text-black mb-2' htmlFor="project-name">Project Name</label>
-          <input 
-            className='border border-gray-300 w-[440px] p-2 rounded' 
-            type="text" 
-            id="project-name" 
-            name="project-name" 
-            value={projectName}
-            onChange={handleProjectNameChange}
-          />
+    <div className='relative'>
+      <form className='mt-12 flex flex-col' onSubmit={handleSubmit}>
+        <p className='font-bold text-3xl text-blue-700 mb-8'>Project Settings</p>
+        {/* Row */}
+        <div className='flex ml-8'>
+          <div className='flex flex-col mr-8'>
+            <label className='font-semibold text-lg text-black mb-2' htmlFor="project-name">Project Name</label>
+            <input 
+              className='border border-gray-300 w-[440px] p-2 rounded' 
+              type="text" 
+              id="project-name" 
+              name="project-name" 
+              value={projectName}
+              onChange={handleProjectNameChange}
+            />
+          </div>
+          <div className='flex flex-col'>
+            <label className='font-semibold text-lg text-black mb-2' htmlFor="project-lead">Project Lead</label>
+            <p className='border border-gray-300 w-[440px] p-2 rounded text-base'>{projectLead}</p>
+          </div>
         </div>
-        <div className='flex flex-col'>
-          <label className='font-semibold text-lg text-black mb-2' htmlFor="project-lead">Project Lead</label>
-          <p className='border border-gray-300 w-[440px] p-2 rounded text-base'>{projectLead}</p>
+        {/* Row */}
+        <div className='flex mt-8 ml-8'>
+          <div className='flex flex-col'>
+            <button className='bg-blue-700 text-white w-[140px] p-2 rounded'>Save Changes</button>
+          </div>
         </div>
-      </div>
-      {/* Row */}
-      <div className='flex mt-8 ml-8'>
-        <div className='flex flex-col'>
-          <button className='bg-blue-700 text-white w-[140px] p-2 rounded'>Save Changes</button>
-        </div>
-      </div>
-    </form>
+      </form>
+      {showToast && <SuccessToast message={toastMessage} onClose={dismissToast} />}
+    </div>
   );
 };
 

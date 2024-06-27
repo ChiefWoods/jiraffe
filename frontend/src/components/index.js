@@ -6,6 +6,7 @@ import Lane from './lane';
 import EditUserCard from './EditUserCard';
 import UpdateProject from './UpdateProject';
 import AccessTable from './AccessTable';
+import SuccessToast from './SuccessToast';
 
 export {
   Navbar,
@@ -15,5 +16,6 @@ export {
   Lane,
   EditUserCard,
   UpdateProject,
-  AccessTable
+  AccessTable,
+  SuccessToast,
 }
