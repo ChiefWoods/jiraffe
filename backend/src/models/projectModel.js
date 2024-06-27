@@ -6,17 +6,12 @@ const projectSchema = mongoose.Schema(
       type: String,
       required: true,
     },
-    projectLead: {
-      type: mongoose.Schema.Types.ObjectId,
-      required: true,
-      ref: "User",
-    },
-    admins:[
+    admin: 
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
-      }
-    ],
+      },
+    
     members: [
       {
         type: mongoose.Schema.Types.ObjectId,
