@@ -1,11 +1,24 @@
 import { Router } from "express";
+import mongoose from "mongoose";
 import Task from "../models/taskModel.js";
 
 const taskRouter = Router();
 
+/**
+ * Checks if the task ID exists and is a valid MongoDB Object ID.
+ *
+ * @param {Request} req - The request object.
+ * @param {Response} res - The response object.
+ * @param {NextFunction} next - The next function.
+ * @returns {void}
+ */
 function checkTaskIdParam(req, res, next) {
-  if (!req.params.task_id) {
+  const { task_id } = req.params;
+
+  if (!task_id) {
     return res.status(400).json({ message: "Task ID is required." });
+  } else if (!mongoose.Types.ObjectId.isValid(task_id)) {
+    return res.status(400).json({ message: "Task ID is not valid." });
   }
 
   next();

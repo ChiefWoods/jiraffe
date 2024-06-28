@@ -2,20 +2,45 @@ import { Router } from "express";
 import mongoose from "mongoose";
 import Project from "../models/projectModel.js";
 import Task from "../models/taskModel.js";
+import User from "../models/userModel.js";
 
 const projectRouter = Router();
 
+/**
+ * Checks if the project ID exists and is a valid MongoDB Object ID.
+ *
+ * @param {Request} req - The request object.
+ * @param {Response} res - The response object.
+ * @param {NextFunction} next - The next function.
+ * @returns {void}
+ */
 function checkProjectIdParam(req, res, next) {
-  if (!req.params.project_id) {
+  const { project_id } = req.params;
+
+  if (project_id === ":project_id") {
     return res.status(400).json({ message: "Project ID is required." });
+  } else if (!mongoose.Types.ObjectId.isValid(project_id)) {
+    return res.status(400).json({ message: "Project ID is not valid." });
   }
 
   next();
 }
 
+/**
+ * Checks if the user ID exists and is a valid MongoDB Object ID.
+ *
+ * @param {Request} req - The request object.
+ * @param {Response} res - The response object.
+ * @param {NextFunction} next - The next function.
+ * @returns {void}
+ */
 function checkUserIdBody(req, res, next) {
-  if (!req.body.user_id) {
+  const { user_id } = req.body;
+
+  if (!user_id) {
     return res.status(400).json({ message: "User ID is required." });
+  } else if (!mongoose.Types.ObjectId.isValid(user_id)) {
+    return res.status(400).json({ message: "User ID is not valid." });
   }
 
   next();
@@ -23,8 +48,18 @@ function checkUserIdBody(req, res, next) {
 
 // Get all projects
 projectRouter.get("/", async (req, res) => {
+  const { user_id } = req.body;
+
   try {
-    const projects = await Project.find();
+    let projects;
+
+    if (!user_id) {
+      projects = await Project.find();
+    } else {
+      projects = await Project.find({
+        $or: [{ admin: user_id }, { members: user_id }, { viewers: user_id }],
+      });
+    }
 
     res.status(200).json({ projects });
   } catch (err) {
@@ -32,82 +67,50 @@ projectRouter.get("/", async (req, res) => {
   }
 });
 
-// Get project by ID
-projectRouter.get("/:project_id", async (req, res) => {
-  const { project_id } = req.params;
-
-  if (!mongoose.Types.ObjectId.isValid(project_id)) {
-    console.error("Valid Project ID is required.");
-    return res.status(400).json({ error: "Valid Project ID is required." });
-  }
-
-  try {
-    const project = await Project.findById(project_id);
-
-    if (!project) {
-      console.error("Project not found.");
-      return res.status(404).json({ error: "Project not found." });
-    }
-
-    res.status(200).json({ project });
-  } catch (err) {
-    console.error("Error fetching project:", err);
-    res.status(500).json({ error: "Internal server error." });
-  }
-});
-
-// Get project ID based on user ID
-projectRouter.get("/user/:user_id", async (req, res) => {
-  const { user_id } = req.params;
-
-  if (!mongoose.Types.ObjectId.isValid(user_id)) {
-    console.error("Valid User ID is required.");
-    return res.status(400).json({ error: "Valid User ID is required." });
-  }
-
-  try {
-    const project = await Project.findOne({ admin: user_id });
-
-    if (!project) {
-      console.error("Project not found.");
-      return res.status(404).json({ error: "User not found." });
-    }
-
-    res.status(200).json( project);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
-// Update project
-projectRouter.put("/:project_id", async (req, res) => {
-  try {
+projectRouter
+  .route("/:project_id")
+  .all(checkProjectIdParam)
+  // Get project
+  .get(async (req, res) => {
     const { project_id } = req.params;
-    const { name } = req.body;
 
-    if (!mongoose.Types.ObjectId.isValid(project_id)) {
-      return res.status(400).json({ message: "Valid Project ID is required." });
+    try {
+      const project = await Project.findById(project_id);
+
+      if (!project) {
+        return res.status(404).json({ message: "Project not found." });
+      }
+
+      res.status(200).json({ project });
+    } catch (err) {
+      res.status(500).json({ message: err.message });
     }
+  })
+  // Update project
+  .put(async (req, res) => {
+    try {
+      const { project_id } = req.params;
+      const { name } = req.body;
 
-    if (!name) {
-      return res.status(400).json({ message: "Name is required." });
+      if (!name) {
+        return res.status(400).json({ message: "Name is required." });
+      }
+
+      const result = await Project.findByIdAndUpdate(
+        project_id,
+        { name },
+        { new: true },
+      );
+
+      if (!result) {
+        return res.status(404).json({ message: "Project not found." });
+      }
+
+      res.status(200).json({ project: result });
+    } catch (err) {
+      res.status(500).json({ message: err.message });
     }
-
-    const result = await Project.findByIdAndUpdate(
-      project_id,
-      { name },
-      { new: true }
-    );
-
-    if (!result) {
-      return res.status(404).json({ message: "Project not found." });
-    }
-
-    res.status(200).json({ project: result });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
+  });
 
 projectRouter
   .route("/:project_id/task")
@@ -118,10 +121,6 @@ projectRouter
       const { project_id } = req.params;
 
       const tasks = await Task.find({ project_id });
-
-      if (!tasks) {
-        return res.status(404).json({ message: "No tasks found." });
-      }
 
       res.status(200).json({ tasks });
     } catch (err) {
@@ -136,6 +135,17 @@ projectRouter
 
       if (!name) {
         return res.status(400).json({ message: "Name is required." });
+      } else if (!assignee) {
+        return res.status(400).json({ message: "Assignee is required." });
+      } else if (!mongoose.Types.ObjectId.isValid(assignee)) {
+        return res.status(400).json({ message: "Assignee is not valid." });
+      } else if (!(await User.findById(assignee))) {
+        return res.status(404).json({ message: "Assignee does not exist." });
+      } else if (status && !["TO DO", "IN PROGRESS", "DONE"].includes(status)) {
+        return res.status(400).json({
+          message:
+            "Only status of 'TO DO', 'IN PROGRESS' and 'DONE' are allowed.",
+        });
       }
 
       const project = await Project.findById(project_id);
@@ -147,8 +157,8 @@ projectRouter
       const task = await Task.create({
         project_id,
         name,
-        desc: desc ?? "",
-        status: status ?? "TO DO",
+        desc: desc || "",
+        status: status || "TO DO",
         assignee,
       });
 
@@ -160,12 +170,19 @@ projectRouter
     }
   });
 
-// Add user to project
 projectRouter
-  .route("/addusertoproject")
+  .route("/:project_id/user")
+  .all(checkProjectIdParam, checkUserIdBody)
+  // Add user to project
   .post(async (req, res) => {
+    // TODO
     try {
-      const { project_id, user_id, user_role } = req.body;
+      const { project_id } = req.params;
+      const { user_id, role } = req.body;
+
+      if (!role) {
+        return res.status(400).json({ message: "User role is required." });
+      }
 
       const project = await Project.findById(project_id);
 
@@ -173,10 +190,22 @@ projectRouter
         return res.status(404).json({ message: "Project not found." });
       }
 
-      if (user_role === "member") {
+      if (
+        project.admin.toString() !== user_id ||
+        project.members.includes(user_id) ||
+        project.viewers.includes(user_id)
+      ) {
+        return res.status(400).json({ message: "User is already in project." });
+      }
+
+      if (role === "member") {
         project.members.push(user_id);
-      } else if (user_role === "viewer") {
+      } else if (role === "viewer") {
         project.viewers.push(user_id);
+      } else {
+        return res
+          .status(400)
+          .json({ message: "Role must be either 'member' or 'viewer'." });
       }
 
       await project.save();
@@ -188,18 +217,16 @@ projectRouter
       res.status(500).json({ message: err.message });
     }
   })
-
-  projectRouter
-  .route("/:project_id/user")
-  .all(checkProjectIdParam, checkUserIdBody)
   // Update user in project
   .put(async (req, res) => {
     try {
       const { project_id } = req.params;
       const { user_id, role } = req.body;
 
-      if (!["member", "viewer"].includes(role)) {
-        return res.status(400).json({ message: "Role must be either 'member' or 'viewer'." });
+      if (!user_id) {
+        return res.status(400).json({ message: "User ID is required." });
+      } else if (!role) {
+        return res.status(400).json({ message: "User role is required." });
       }
 
       const project = await Project.findById(project_id);
@@ -208,22 +235,32 @@ projectRouter
         return res.status(404).json({ message: "Project not found." });
       }
 
-      const userIdStr = user_id.toString();
-
       if (role === "member") {
-        if (!project.members.includes(userIdStr)) {
+        if (!project.members.includes(user_id)) {
           project.members.push(user_id);
         }
 
-        project.viewers = project.viewers.filter(viewer => viewer.toString() !== userIdStr);
+        project.viewers = project.viewers.filter(
+          (viewer) => viewer.toString() !== user_id,
+        );
       } else if (role === "viewer") {
-        if (!project.viewers.includes(userIdStr)) {
+        if (!project.viewers.includes(user_id)) {
           project.viewers.push(user_id);
         }
 
-        project.members = project.members.filter(member => member.toString() !== userIdStr);
+        project.members = project.members.filter(
+          (member) => member.toString() !== user_id,
+        );
+      } else if (role === "admin") {
+        return res
+          .status(400)
+          .json({
+            message: "Only one admin role is allowed and cannot be reassigned.",
+          });
       } else {
-        return res.status(400).json({ message: "Role must be either 'member' or 'viewer'." });
+        return res
+          .status(400)
+          .json({ message: "Role must be either 'member' or 'viewer'." });
       }
 
       await project.save();
@@ -232,8 +269,7 @@ projectRouter
         message: `User ${user_id}'s role updated in project ${project_id}.`,
       });
     } catch (err) {
-      console.error('Error updating user role:', err);
-      res.status(500).json({ message: "Internal server error." });
+      res.status(500).json({ message: err.message });
     }
   })
   // Remove user from project
@@ -248,15 +284,15 @@ projectRouter
         return res.status(404).json({ message: "Project not found." });
       }
 
-      const userIdStr = user_id.toString();
-
-      const originalMembersLength = project.members.length;
-      const originalViewersLength = project.viewers.length;
-
-      project.members = project.members.filter(member => member.toString() !== userIdStr);
-      project.viewers = project.viewers.filter(viewer => viewer.toString() !== userIdStr);
-
-      if (originalMembersLength === project.members.length && originalViewersLength === project.viewers.length) {
+      if (project.members.includes(user_id)) {
+        project.members = project.members.filter(
+          (member) => member.toString() !== user_id,
+        );
+      } else if (project.viewers.includes(user_id)) {
+        project.viewers = project.viewers.filter(
+          (viewer) => viewer.toString() !== user_id,
+        );
+      } else {
         return res.status(404).json({ message: "User not found in project." });
       }
 
@@ -266,57 +302,8 @@ projectRouter
         message: `User ${user_id} removed from project ${project_id}.`,
       });
     } catch (err) {
-      console.error('Error removing user from project:', err);
-      res.status(500).json({ message: "Internal server error." });
+      res.status(500).json({ message: err.message });
     }
   });
-
-// Get all projects based on user_id
-projectRouter.get("/all/:user_id", async (req, res) => {
-  const { user_id } = req.params;
-
-  if (!mongoose.Types.ObjectId.isValid(user_id)) {
-    console.error("Valid User ID is required.");
-    return res.status(400).json({ error: "Valid User ID is required." });
-  }
-
-  try {
-    const projects = await Project.find({
-      $or: [{ admin: user_id }, { members: user_id }, { viewers: user_id }],
-    }).exec();
-
-    if (!projects.length) {
-      console.error("Projects not found.");
-      return res.status(404).json({ error: "Projects not found." });
-    }
-
-    res.status(200).json({ projects });
-  } catch (err) {
-    console.error("Error fetching projects:", err);
-    res.status(500).json({ error: "Internal server error." });
-  }
-});
-
-/**
- * Get project ID based on project name
- * @deprecated Currently not in use
- */
-projectRouter.get("/name/:project_name", async (req, res) => {
-  const { project_name } = req.params;
-
-  try {
-    const project = await Project.findOne({ name: project_name });
-
-    if (!project) {
-      console.error("Project not found.");
-      return res.status(404).json({ error: "Project not found." });
-    }
-
-    res.status(200).json({ projectID: project._id });
-  } catch (err) {
-    console.error("Error fetching project:", err);
-    res.status(500).json({ error: "Internal server error." });
-  }
-});
 
 export default projectRouter;
