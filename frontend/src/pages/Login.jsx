@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { logo_title,Foambg,logo_blue } from "../assets";
 import { FaArrowRightToBracket } from "react-icons/fa6";
+import { SuccessToast, ErrorToast } from "../components";
 
 async function fetchProjectID(token, userID) {
   try {
@@ -62,13 +63,68 @@ async function loginUser(email, password) {
 const Login = () => {
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+
+  const [errorToast, setErrorToast] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
 	function handleSubmit(e) {
 		e.preventDefault();
+
+    if (!email || !password) {
+      setErrorMessage('Please fill out all fields');
+      setErrorToast(true);
+      return;
+    }
+
 		loginUser(email, password);
 	}
 
+  useEffect(() => {
+    try {
+      if (localStorage.getItem('registerSuccessToast') === 'true') {
+        setSuccessMessage('Registered Successfully!');
+        setShowSuccessToast(true);
+        localStorage.removeItem('registerSuccessToast');
+      }
+
+      if (localStorage.getItem('registerErrorToast') === 'true') {
+        setErrorMessage('Error registering user');
+        setErrorToast(true);
+        localStorage.removeItem('registerErrorToast');
+      }
+    } catch (error) {
+      console.error('Error fetching details:', error);
+    }
+  }, []);
+
+  // Success toast dismiss after 2.5 seconds
+  useEffect(() => {
+    if (showSuccessToast) {
+      const timer = setTimeout(() => {
+        setShowSuccessToast(false);
+      }, 2500);
+      return () => clearTimeout(timer);
+    }
+  }, [showSuccessToast]);
+
+  // Error toast dismiss after 2.5 seconds
+  useEffect(() => {
+    if (errorToast) {
+      const timer = setTimeout(() => {
+        setErrorToast(false);
+      }, 2500);
+      return () => clearTimeout(timer);
+    }
+  });
+
+  const dismissToast = () => {
+    setShowSuccessToast(false);
+  }
+
 	return (
+    <>
 		<div className="min-h-screen justify-center items-center" >
 			<div className="bg-cover bg-center flex items-center justify-center min-h-screen" style={{backgroundImage:`url(${Foambg})`}}>
 			<div className="w-[75%] max-w-md px-6 py-3 bg-white rounded-2xl shadow-md">
@@ -134,6 +190,9 @@ const Login = () => {
 			</div>
 			</div>
 		</div>
+    {showSuccessToast && <SuccessToast message={successMessage} onClose={dismissToast} />}
+    {errorToast && <ErrorToast message={errorMessage} onClose={dismissToast} />}
+    </>
 	);
 };
 

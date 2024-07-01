@@ -1,41 +1,87 @@
-import { useState } from "react";
+import { useEffect, useReducer, useState } from "react";
 import { logo_title,Foambg } from "../assets";
 import { FaCheckCircle } from "react-icons/fa";
+import { ErrorToast } from "../components";
 
-function registerUser(name, email, password) {
-	fetch(`${import.meta.env.VITE_BACK_END_URL}/auth/register`, {
-		method: "POST",
-		headers: {
-			"Content-Type": "application/json",
-		},
-		body: JSON.stringify({
-			name,
-			email,
-			password,
-		}),
-		mode: "cors",
-	})
-		.then((res) => {
-			if (res.ok) {
-				window.location.href = "/login";
-			} else {
-				res.json().then((data) => console.log(data.error));
-			}
-		})
-		.catch((err) => console.error(err));
+async function registerUser(name, email, password) {
+  try {
+    const response = await fetch(`${import.meta.env.VITE_BACK_END_URL}/auth/register`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        name,
+        email,
+        password,
+      }),
+      mode: 'cors',
+    });
+
+    if (response.ok) {
+      return 'Registered Successfully!';
+    } else {
+      const data = await response.json();
+      throw new Error(data.error);
+    }
+  } catch (error) {
+    throw new Error('Error registering user:', error);
+  }
 }
 
 const Register = () => {
 	const [name, setName] = useState("");
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
+  const [errorToast, setErrorToast] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
 	function handleSubmit(e) {
 		e.preventDefault();
-		registerUser(name, email, password);
+
+    if (!name || !email || !password) {
+      setErrorMessage('Please fill out all fields');
+      setErrorToast(true);
+      return;
+    }
+
+		registerUser(name, email, password)
+      .then((message) => {
+        window.location.href = '/login';
+        localStorage.setItem('registerSuccessToast', true);
+      })
+      .catch((error) => {
+        console.error('Error registering user:', error);
+      });
 	}
 
+  useEffect(() => {
+    try {
+      if (localStorage.getItem('registerErrorToast') === 'true') {
+        setErrorToast(true);
+        setErrorMessage('Error registering user');
+        localStorage.removeItem('registerErrorToast');
+      }
+    } catch (error) {
+      console.error('Error checking for error toast:', error);
+    }
+  })
+
+  useEffect(() => {
+    if (errorToast) {
+      const timer = setTimeout(() => {
+        setErrorToast(false);
+      }, 2500);
+      return () => clearTimeout(timer);
+    }
+  }, [errorToast]);
+
+  const dismissToast = () => {
+    setErrorToast(false);
+  }
+
 	return (
+    <>
 		<div className="min-h-screen justify-center items-center" >
 			<div className="bg-cover bg-center flex items-center justify-center min-h-screen" style={{backgroundImage:`url(${Foambg})`}}>
 				<div className="w-[75%] h-[80%] max-w-md px-6 py-3 bg-white rounded-2xl shadow-md ">
@@ -116,6 +162,8 @@ const Register = () => {
 			</div>
 			
 		</div>
+    {errorToast && <ErrorToast message={errorMessage} onClose={dismissToast} />}
+    </>
 	);
 };
 
