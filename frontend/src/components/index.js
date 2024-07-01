@@ -7,6 +7,7 @@ import EditUserCard from './EditUserCard';
 import UpdateProject from './UpdateProject';
 import AccessTable from './AccessTable';
 import SuccessToast from './SuccessToast';
+import ErrorToast from './ErrorToast';
 
 export {
   Navbar,
@@ -18,4 +19,5 @@ export {
   UpdateProject,
   AccessTable,
   SuccessToast,
+  ErrorToast,
 }
