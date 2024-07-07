@@ -2,6 +2,7 @@ import { Router } from "express";
 import mongoose from "mongoose";
 import Project from "../models/projectModel.js";
 import Task from "../models/taskModel.js";
+import User from "../models/userModel.js";
 
 const projectRouter = Router();
 
@@ -132,13 +133,17 @@ projectRouter
   .post(async (req, res) => {
     try {
       const { project_id } = req.params;
-      const { name, desc, status, assignee } = req.body;
+      const { name, desc, status, assignees } = req.body;
 
       if (!name) {
         return res.status(400).json({ message: "Name is required." });
       }
 
       const project = await Project.findById(project_id);
+      const assigneeObjects = await Promise.all(assignees.map(async assigneeId => {
+        const user = await User.findById(assigneeId);
+        return user;
+      }));
 
       if (!project) {
         return res.status(404).json({ message: "Project not found." });
@@ -149,7 +154,7 @@ projectRouter
         name,
         desc: desc ?? "",
         status: status ?? "TO DO",
-        assignee,
+        assignees:assigneeObjects,
       });
 
       await task.save();

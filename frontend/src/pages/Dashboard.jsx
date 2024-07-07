@@ -190,9 +190,12 @@ const Dashboard = () => {
   }, []);
 
   const assignees=[...projectMembers,...projectViewers]
-  const getAssigneeNames=(assigneeIDs)=>{
-    return assigneeIDs.map(id=> userMapping[id] || id)
-  }
+  const getAssignees = (assigneeIDs) => {
+    return assigneeIDs.map(id => ({
+      id,
+      name: userMapping[id] || id
+    }));
+  };
  
 
   const handleDeleteTask=async(taskID)=>{
@@ -269,7 +272,7 @@ const Dashboard = () => {
           isEditing={isEditing}
           taskStatusOptions={['TO DO', 'IN PROGRESS', 'DONE']}
           onClose={closeTaskCard}
-          availableAssignees={getAssigneeNames(assignees)}
+          availableAssignees={getAssignees(assignees)}
           projectID={projectID}
           />
         )}

@@ -35,7 +35,7 @@ taskRouter
     try {
       const { task_id } = req.params;
       const { name, desc, status, assignee } = req.body;
-
+      console.log(req.body);
       if (!name && !desc && !status && !assignee) {
         return res
           .status(400)
