@@ -216,10 +216,12 @@ const Dashboard = () => {
     setisTaskCardOpen(true);
   };
 
-  const handleAddTaskClick=(laneName)=>{
+  const handleAddTaskClick=(laneName,projectID)=>{
     console.log('handleaddtask clicked')
+    console.log(projectID);
     setSelectedTask({
-      status:laneName
+      status:laneName,
+      projectID
     });
     console.log(selectedTask);
     setisEditing(false);
@@ -246,7 +248,7 @@ const Dashboard = () => {
           <p className="text-[#0052CC] text-[33px] font-semibold">{projectName}</p>
           <div className='flex flex-row'>
             <SettingsLink />
-            <button className="border-[#0052CC] border-2 bg-white text-[#0052CC] hover:bg-[#0052CC] hover:text-white flex flex-row items-center group" onClick={toggleAddCard}>
+            <button className="border-[#0052CC] border-2 bg-white text-[#0052CC] hover:bg-[#0052CC] hover:text-white flex flex-row items-center group" onClick={() => handleAddTaskClick('TO DO', projectID)}>
               <p className="text-2xl group-hover:animate-bounce mr-1">+</p>
               <p className='text-[16px]'>Add Task</p>
             </button>
@@ -255,7 +257,7 @@ const Dashboard = () => {
 
         <div className="flex flex-row w-[80%] mt-6">
           {swimlanes.map((swimlane, index) => (
-            <Lane key={index} lane={swimlane} tasks={tasks.filter(task => task.status === swimlane.name)} onDeleteTask={handleDeleteTask} onTaskClick={handleTaskClick} onAddTaskClick={handleAddTaskClick}/>
+            <Lane key={index} lane={swimlane} tasks={tasks.filter(task => task.status === swimlane.name)} onDeleteTask={handleDeleteTask} onTaskClick={handleTaskClick} onAddTaskClick={(laneName) => handleAddTaskClick(laneName, projectID)}/>
           ))}
         </div>
 
@@ -268,6 +270,7 @@ const Dashboard = () => {
           taskStatusOptions={['TO DO', 'IN PROGRESS', 'DONE']}
           onClose={closeTaskCard}
           availableAssignees={getAssigneeNames(assignees)}
+          projectID={projectID}
           />
         )}
       </div>

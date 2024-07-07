@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import Select from 'react-select';
 import { MdOutlineClose } from 'react-icons/md';
+import { RiErrorWarningFill } from "react-icons/ri";
 
-const TaskCard = ({ task, isEditing, taskStatusOptions, onClose, availableAssignees }) => {
+const TaskCard = ({ task, isEditing, taskStatusOptions, onClose, availableAssignees,projectID }) => {
   const [taskTitle, setTaskTitle] = useState('');
+  const [submitted,setSubmitted]=useState(false);
   const [taskStatus, setTaskStatus] = useState('');
   const [taskDescription, setTaskDescription] = useState('');
   const [dateCreated, setDateCreated] = useState('');
@@ -37,7 +39,12 @@ const TaskCard = ({ task, isEditing, taskStatusOptions, onClose, availableAssign
     setAssignees(selectedOptions ? selectedOptions.map(option => option.value) : []);
   };
 
-  const handleSave = async () => {
+  const handleSave = async ()=> {
+    console.log(projectID )
+    setSubmitted(true);
+    if (taskTitle.trim() === '' || taskDescription.trim() === '') {
+      return; // Do not proceed if taskTitle is empty
+    }
     const taskData = {
       name: taskTitle,
       status: taskStatus,
@@ -53,11 +60,12 @@ const TaskCard = ({ task, isEditing, taskStatusOptions, onClose, availableAssign
     };
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_BACK_END_URL}/task${isEditing ? `/${task.id}` : ''}`, requestOptions);
+      const response = await fetch(`${import.meta.env.VITE_BACK_END_URL}/${isEditing ? `task/${task._id}` : `project/${projectID}/task`}`, requestOptions);
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }
       onClose();
+      window.location.reload();
     } catch (error) {
       console.error('Error saving task:', error);
     }
@@ -80,14 +88,26 @@ const TaskCard = ({ task, isEditing, taskStatusOptions, onClose, availableAssign
             <div className={` ${isEditing ? 'w-[80%]' : 'w-[100%]'}`}>
               <div className=''>
                 <h2 className='text-[30px] font-semibold mb-2 text-[#0052CC]'>{isEditing ? 'Edit Task' : 'Add Task'}</h2>
-                <p className='font-semibold mb-2'>Task Name:</p>
-                <input
+                <div>
+                  <div className='flex flex-row mb-2'>
+                    <p className='font-semibold  mr-4'>Task Title:</p>
+                    {submitted && taskTitle.trim() === '' && (
+                    <div className='flex items-center'>
+                      <RiErrorWarningFill className='text-red-500 text-[14px] mr-1' />
+                      <p className='text-red-500 italic text-[14px]'>Task title is required</p>
+                    </div>
+                    )}  
+                  </div>
+                  <input
                   type='text'
                   className='text-sm w-full p-2 mb-2 bg-[#ffffff] border-2 text-black focus:outline-none focus:ring-2 focus:ring-blue-500 rounded'
                   placeholder='Task title...'
                   value={taskTitle}
                   onChange={(e) => setTaskTitle(e.target.value)}
-                />
+                  />
+                </div>
+                
+                
                 <div className='mb-2'>
                   <p className='font-semibold mb-2'>Task Progress:</p>
                   <Select
@@ -97,6 +117,7 @@ const TaskCard = ({ task, isEditing, taskStatusOptions, onClose, availableAssign
                     className='basic-single'
                     classNamePrefix='select'
                     placeholder='Select...'
+                    required
                   />
                 </div>
                 <div>
@@ -112,15 +133,24 @@ const TaskCard = ({ task, isEditing, taskStatusOptions, onClose, availableAssign
                 </div>
               </div>
               <div className='mb-4'>
-                <p className='font-semibold'>Description:</p>
+                <div className='flex flex-row mb-2'>
+                  <p className='font-semibold mr-4'>Description:</p>
+                  {submitted && taskDescription.trim() === '' && (
+                    <div className='flex items-center'>
+                      <RiErrorWarningFill className='text-red-500 text-[14px] mr-1' />
+                      <p className='text-red-500 italic text-[14px]'>Description is required</p>
+                    </div>
+                  )}
+                </div>
                 <textarea
                   type='text'
                   className='text-sm w-full p-2 bg-[#ffffff] border-2 text-black focus:outline-none focus:ring-2 focus:ring-blue-500 rounded resize-none overflow-hidden'
                   placeholder='Add a description...'
                   value={taskDescription}
                   onChange={handleDescriptionChange}
+                  required
                 />
-              </div>
+            </div>
             </div>
             {isEditing && (
               <div className='mt-6 mr-6 '>
