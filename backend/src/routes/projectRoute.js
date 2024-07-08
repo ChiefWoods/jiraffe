@@ -155,6 +155,12 @@ projectRouter
       }
 
       const project = await Project.findById(project_id);
+      const assigneeObjects = await Promise.all(
+        assignees.map(async (assigneeId) => {
+          const user = await User.findById(assigneeId);
+          return user;
+        }),
+      );
 
       if (!project) {
         return res.status(404).json({ message: "Project not found." });

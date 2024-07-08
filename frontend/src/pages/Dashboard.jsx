@@ -149,16 +149,13 @@ const Dashboard = () => {
     setisTaskCardOpen(true);
   };
 
-  const handleAddTaskClick = (laneName) => {
-    console.log("handleaddtask clicked");
+  const handleAddTaskClick = (laneName, projectID) => {
     setSelectedTask({
       status: laneName,
       projectID,
     });
-    console.log(selectedTask);
     setisEditing(false);
     setisTaskCardOpen(true);
-    console.log(isTaskCardOpen);
   };
 
   const closeTaskCard = () => {
@@ -243,7 +240,7 @@ const Dashboard = () => {
             <SettingsLink />
             <button
               className="group flex flex-row items-center border-2 border-[#0052CC] bg-white text-[#0052CC] hover:bg-[#0052CC] hover:text-white"
-              onClick={toggleAddCard}
+              onClick={() => handleAddTaskClick("TO DO", projectID)}
             >
               <p className="mr-1 text-2xl group-hover:animate-bounce">+</p>
               <p className="text-[16px]">Add Task</p>
@@ -259,7 +256,9 @@ const Dashboard = () => {
               tasks={tasks.filter((task) => task.status === swimlane.name)}
               onDeleteTask={handleDeleteTask}
               onTaskClick={handleTaskClick}
-              onAddTaskClick={handleAddTaskClick}
+              onAddTaskClick={(laneName) =>
+                handleAddTaskClick(laneName, projectID)
+              }
             />
           ))}
         </div>
