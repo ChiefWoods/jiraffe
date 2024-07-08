@@ -45,14 +45,6 @@ const Lane = ({ lane, tasks, onDeleteTask, onTaskClick, onAddTaskClick }) => {
           </div>
           {tasks.map((task, index) => (
               <TaskItem  key={task._id} task={task} onDeleteTask={onDeleteTask} onTaskClick={() => onTaskClick(task)} />
-
-            // <div key={index} className='mb-2 border-solid border-2 rounded-2xl mt-2 ml-2 p-5 bg-white min-w-[300px] cursor-pointer transition-transform duration-300 hover:scale-105' style={{ borderColor: lane.strokecolor }} onClick={handleAddTask}>
-            //   <div className='flex flex-row justify-between'>
-            //     <p className="font-semibold">{task.name}</p>
-            //     <p className='text-slate-400 hover:text-[#D70000] text-[24px] transition-transform duration-300 hover:scale-105 cursor-pointer' onClick={() => handleDelete(task._id)}><GoTrash /></p>
-            //   </div>
-            //   <p className="text-sm">{task.desc}</p>
-            // </div>
           ))}
         </div>
       </div>

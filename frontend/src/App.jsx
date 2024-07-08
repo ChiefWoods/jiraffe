@@ -8,7 +8,7 @@ import {
   Login, 
   Register,
   Dashboard,
-  Settings
+  Settings,
 } from './pages'
 
 

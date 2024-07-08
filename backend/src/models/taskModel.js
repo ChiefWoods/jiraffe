@@ -19,7 +19,7 @@ const taskSchema = mongoose.Schema(
       enum: ["TO DO", "IN PROGRESS", "DONE"],
       default: "TO DO",
     },
-    assignee: [
+    assignees: [
       {
         type:mongoose.Schema.Types.ObjectId,
         required:true,
