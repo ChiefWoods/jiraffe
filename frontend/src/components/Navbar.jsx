@@ -4,6 +4,26 @@ import { MdDashboard } from "react-icons/md";
 import { IoIosUndo } from "react-icons/io";
 import { SuccessToast } from ".";
 
+async function getUserDetails(token, userID) {
+  try {
+    const response = await fetch(`${import.meta.env.VITE_BACK_END_URL}/user/userdetails/${userID}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    if (response.ok) {
+      const data = await response.json();
+      return data.user;
+    } else {
+      throw new Error('Failed to fetch user details');
+    }
+  } catch (error) {
+    console.error('Error fetching user details:', error);
+    throw error;
+  }
+}
+
 async function getProjectsByUserId(userId) {
   try {
     const response = await fetch(`${import.meta.env.VITE_BACK_END_URL}/project/all/${userId}`, {
@@ -66,6 +86,7 @@ const Navbar = () => {
   const [currentProject, setCurrentProject] = useState(null);
   const [projects, setProjects] = useState([]);
   const [showToast, setShowToast] = useState(false);
+  const [userName, setUserName] = useState('');
 
   function handleLogout(e) {
     e.preventDefault();
@@ -91,6 +112,10 @@ const Navbar = () => {
         try {
           const projects = await getProjectsByUserId(userId);
           const currentProject = await getProjectById(projectId);
+          const user = await getUserDetails(localStorage.getItem('token'), userId);
+          const userName = user.name;
+
+          setUserName(userName);
           
           setCurrentProject(currentProject);
           setProjects(projects.filter(project => project._id !== currentProject._id));
@@ -155,6 +180,9 @@ const Navbar = () => {
         </ul>
         <div className="flex-grow flex flex-col justify-end mb-6">
           <ul className="flex flex-col space-y-4 ml-6">
+            <li className="flex items-center mr-2">
+              <p className="bg-blue-500 text-white font-bold px-4 py-2 rounded-full text-sm tracking-wider w-[140px] ml-[4px] text-center">{userName}</p>
+            </li>
             <DashboardLink />
             <li className="flex items-center mr-2 tracking-wide">
               <button className="flex items-center bg-white text-[#0052CC] hover:scale-105 ml-1 px-2 py-1 rounded-lg w-[140px] transition-colors duration-300" onClick={handleLogout}>
