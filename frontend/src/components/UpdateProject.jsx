@@ -98,6 +98,7 @@ const UpdateProject = () => {
   const [toastMessage, setToastMessage] = useState(null);
   const [showToast, setShowToast] = useState(false);
   const [userRole, setUserRole] = useState(null);
+  const [errorMessage, setErrorMessage] = useState('');
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -106,6 +107,11 @@ const UpdateProject = () => {
     const userID = urlParams.get('userid');
     const projectID = urlParams.get('projectid');
   
+    if (!projectName) {
+      setErrorMessage('Project name cannot be empty');
+      return;
+    }
+
     if (token && userID) {
       updateProjectName(projectID, projectName)
         .then((message) => {
@@ -164,6 +170,7 @@ const UpdateProject = () => {
 
   const handleProjectNameChange = (e) => {
     setProjectName(e.target.value);
+    setErrorMessage(''); // Clear the error message when the user starts typing
   };
 
   const dismissToast = () => {
@@ -186,6 +193,9 @@ const UpdateProject = () => {
                 value={projectName}
                 onChange={handleProjectNameChange}
               />
+              {errorMessage && (
+                <p className='text-red-600 mt-2 text-sm mb-[-20px] ml-[6px]'>{errorMessage}</p>
+              )}
             </div>
             <div className='flex flex-col'>
               <label className='font-semibold text-lg text-black mb-2' htmlFor="project-lead">Project Lead</label>
