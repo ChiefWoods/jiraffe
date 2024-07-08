@@ -56,6 +56,7 @@ const AddCard = ({ isOpen, onClose, projectId, onSuccess }) => {
   const [allUsers, setAllUsers] = useState([]);
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("Viewer");
+  const [errorMessage, setErrorMessage] = useState("");
   const rolesArray = ["Viewer", "Member"];
 
   useEffect(() => {
@@ -74,14 +75,17 @@ const AddCard = ({ isOpen, onClose, projectId, onSuccess }) => {
     e.preventDefault();
     const emails = gatherAllEmails(allUsers);
     const userId = emails[email];
-    if (userId) {
+    if (!email) {
+      setErrorMessage('Email cannot be empty');
+    } else if (!userId) {
+      setErrorMessage('Email not found');
+    } else {
       const message = await addUserToProject(projectId, userId, role.toLowerCase());
       if (message) {
         localStorage.setItem('showAddUserToast', 'true');
         onSuccess(); // Notify parent component
+        setErrorMessage('');
       }
-    } else {
-      console.error('Email not found');
     }
   }
 
@@ -108,6 +112,11 @@ const AddCard = ({ isOpen, onClose, projectId, onSuccess }) => {
               onChange={(e) => setEmail(e.target.value)}
             />
           </div>
+          {errorMessage && (
+            <div className='flex mt-2'>
+              <p className='text-red-600 text-sm ml-[10px] mb-[-100px]`'>{errorMessage}</p>
+            </div>
+          )}
           <div className='flex mt-6'>
             <p className='font-semibold'>Role</p>
           </div>

@@ -179,7 +179,7 @@ const Navbar = () => {
           ))}
         </ul>
         <div className="flex-grow flex flex-col justify-end mb-6">
-          <ul className="flex flex-col space-y-4 ml-6">
+          <ul className="flex flex-col space-y-[24px] ml-6">
             <li className="flex items-center mr-2">
               <p className="bg-blue-500 text-white font-bold px-4 py-2 rounded-full text-sm tracking-wider w-[140px] ml-[4px] text-center">{userName}</p>
             </li>
