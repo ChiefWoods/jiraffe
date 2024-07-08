@@ -12,6 +12,15 @@ function getCookie(name) {
   return null;
 }
 
+async function getProjectRole() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const userID = urlParams.get('userid');
+  const projectID = urlParams.get('projectid');
+
+  console.log('User ID:', userID);
+  console.log('Project ID:', projectID);
+}
+
 async function updateProjectName(projectID, projectName) {
   const token = getCookie('token');
   try {
@@ -106,6 +115,8 @@ const UpdateProject = () => {
         const urlParams = new URLSearchParams(window.location.search);
         const userID = urlParams.get('userid');
         const projectID = urlParams.get('projectid');
+
+        const projectRole = await getProjectRole();
   
         if (token && userID && projectID) {
           const project = await fetchProjectDetails(projectID);
@@ -166,7 +177,7 @@ const UpdateProject = () => {
           </div>
           <div className='flex flex-col'>
             <label className='font-semibold text-lg text-black mb-2' htmlFor="project-lead">Project Lead</label>
-            <p className='border border-gray-300 w-[440px] p-2 rounded text-base'>{projectLead}</p>
+            <p className='w-[440px] p-2 text-base font-semibold text-blue-800'>{projectLead}</p>
           </div>
         </div>
         {/* Row */}

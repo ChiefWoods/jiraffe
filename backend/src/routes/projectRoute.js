@@ -319,4 +319,33 @@ projectRouter.get("/name/:project_name", async (req, res) => {
   }
 });
 
+// Get role based on user ID and project ID
+projectRouter.get("/role/:user_id/:project_id", async (req, res) => {
+  const { user_id, project_id } = req.params;
+
+  try {
+    const project = await Project.findById(project_id);
+
+    if (!project) {
+      console.error("Project not found.");
+      return res.status(404).json({ error: "Project not found." });
+    }
+
+    if (project.admin.toString() === user_id) {
+      return res.status(200).json({ role: "admin" });
+    }
+
+    if (project.members.includes(user_id)) {
+      return res.status(200).json({ role: "member" });
+    }
+
+    if (project.viewers.includes(user_id)) {
+      return res.status(200).json({ role: "viewer" });
+    }
+  } catch (err) {
+    console.error("Error fetching role:", err);
+    res.status(500).json({ error: "Internal server error." });
+  }
+});
+
 export default projectRouter;
