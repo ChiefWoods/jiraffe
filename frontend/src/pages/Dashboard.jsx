@@ -47,7 +47,7 @@ async function fetchProject(token, userID) {
       const data = await response.json();
       return {
         projectID: data._id,
-        projectName: data.names,
+        projectName: data.name,
         projectAdmin:data.admins,
         projectMembers:data.members,
         projectViewers:data.viewers
@@ -190,9 +190,12 @@ const Dashboard = () => {
   }, []);
 
   const assignees=[...projectMembers,...projectViewers]
-  const getAssigneeNames=(assigneeIDs)=>{
-    return assigneeIDs.map(id=> userMapping[id] || id)
-  }
+  const getAssignees = (assigneeIDs) => {
+    return assigneeIDs.map(id => ({
+      id,
+      name: userMapping[id] || id
+    }));
+  };
  
 
   const handleDeleteTask=async(taskID)=>{
@@ -216,10 +219,12 @@ const Dashboard = () => {
     setisTaskCardOpen(true);
   };
 
-  const handleAddTaskClick=(laneName)=>{
+  const handleAddTaskClick=(laneName,projectID)=>{
     console.log('handleaddtask clicked')
+    console.log(projectID);
     setSelectedTask({
-      status:laneName
+      status:laneName,
+      projectID
     });
     console.log(selectedTask);
     setisEditing(false);
@@ -246,7 +251,7 @@ const Dashboard = () => {
           <p className="text-[#0052CC] text-[33px] font-semibold">{projectName}</p>
           <div className='flex flex-row'>
             <SettingsLink />
-            <button className="border-[#0052CC] border-2 bg-white text-[#0052CC] hover:bg-[#0052CC] hover:text-white flex flex-row items-center group" onClick={toggleAddCard}>
+            <button className="border-[#0052CC] border-2 bg-white text-[#0052CC] hover:bg-[#0052CC] hover:text-white flex flex-row items-center group" onClick={() => handleAddTaskClick('TO DO', projectID)}>
               <p className="text-2xl group-hover:animate-bounce mr-1">+</p>
               <p className='text-[16px]'>Add Task</p>
             </button>
@@ -255,7 +260,7 @@ const Dashboard = () => {
 
         <div className="flex flex-row w-[80%] mt-6">
           {swimlanes.map((swimlane, index) => (
-            <Lane key={index} lane={swimlane} tasks={tasks.filter(task => task.status === swimlane.name)} onDeleteTask={handleDeleteTask} onTaskClick={handleTaskClick} onAddTaskClick={handleAddTaskClick}/>
+            <Lane key={index} lane={swimlane} tasks={tasks.filter(task => task.status === swimlane.name)} onDeleteTask={handleDeleteTask} onTaskClick={handleTaskClick} onAddTaskClick={(laneName) => handleAddTaskClick(laneName, projectID)}/>
           ))}
         </div>
 
@@ -267,7 +272,8 @@ const Dashboard = () => {
           isEditing={isEditing}
           taskStatusOptions={['TO DO', 'IN PROGRESS', 'DONE']}
           onClose={closeTaskCard}
-          availableAssignees={getAssigneeNames(assignees)}
+          availableAssignees={getAssignees(assignees)}
+          projectID={projectID}
           />
         )}
       </div>

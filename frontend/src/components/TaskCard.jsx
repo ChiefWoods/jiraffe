@@ -1,13 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import Select from 'react-select';
 import { MdOutlineClose } from 'react-icons/md';
+import { RiErrorWarningFill } from "react-icons/ri";
 
-const TaskCard = ({ task, isEditing, taskStatusOptions, onClose, availableAssignees }) => {
+const TaskCard = ({ task, isEditing, taskStatusOptions, onClose, availableAssignees, projectID }) => {
   const [taskTitle, setTaskTitle] = useState('');
+  const [submitted, setSubmitted] = useState(false);
   const [taskStatus, setTaskStatus] = useState('');
   const [taskDescription, setTaskDescription] = useState('');
   const [dateCreated, setDateCreated] = useState('');
   const [assignees, setAssignees] = useState([]);
+
+  const mapAssigneesToObjects = (assigneeIds) => {
+    return assigneeIds.map(id => {
+      const assignee = availableAssignees.find(user => user.id === id);
+      return assignee ? { value: assignee.id, label: assignee.name } : null;
+    }).filter(assignee => assignee !== null); // Filter out null values if any
+  };
+
+  console.log(task.assignees)
 
   useEffect(() => {
     if (task) {
@@ -15,7 +26,11 @@ const TaskCard = ({ task, isEditing, taskStatusOptions, onClose, availableAssign
       setTaskStatus(task.status || '');
       setTaskDescription(task.desc || '');
       setDateCreated(task.createdAt || '');
-      setAssignees(task.assignees || []);
+      if (task.assignees && Array.isArray(task.assignees)) {
+        setAssignees(mapAssigneesToObjects(task.assignees));
+      } else {
+        setAssignees([]);
+      }
     } else {
       setTaskTitle('');
       setTaskStatus('');
@@ -23,7 +38,7 @@ const TaskCard = ({ task, isEditing, taskStatusOptions, onClose, availableAssign
       setDateCreated('');
       setAssignees([]);
     }
-  }, [task]);
+  }, [task, availableAssignees]);
 
   const handleStatusChange = (selectedOption) => {
     setTaskStatus(selectedOption ? selectedOption.value : '');
@@ -34,17 +49,23 @@ const TaskCard = ({ task, isEditing, taskStatusOptions, onClose, availableAssign
   };
 
   const handleAssigneeChange = (selectedOptions) => {
-    setAssignees(selectedOptions ? selectedOptions.map(option => option.value) : []);
+    setAssignees(selectedOptions || []);
   };
 
   const handleSave = async () => {
+    console.log(projectID);
+    setSubmitted(true);
+    if (taskTitle.trim() === '' || taskDescription.trim() === '') {
+      return; // Do not proceed if taskTitle or taskDescription is empty
+    }
     const taskData = {
       name: taskTitle,
       status: taskStatus,
       desc: taskDescription,
       createdAt: dateCreated,
-      assignees: assignees
+      assignees: assignees.map(assignee => assignee.value) // Only send the IDs
     };
+    console.log(taskData);
 
     const requestOptions = {
       method: isEditing ? 'PUT' : 'POST',
@@ -53,10 +74,11 @@ const TaskCard = ({ task, isEditing, taskStatusOptions, onClose, availableAssign
     };
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_BACK_END_URL}/task${isEditing ? `/${task.id}` : ''}`, requestOptions);
+      const response = await fetch(`${import.meta.env.VITE_BACK_END_URL}/${isEditing ? `task/${task._id}` : `project/${projectID}/task`}`, requestOptions);
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }
+      window.location.reload();
       onClose();
     } catch (error) {
       console.error('Error saving task:', error);
@@ -69,7 +91,10 @@ const TaskCard = ({ task, isEditing, taskStatusOptions, onClose, availableAssign
     return date.toLocaleDateString();
   };
 
-  const assigneeOptions = availableAssignees.map(assignee => ({ value: assignee, label: assignee }));
+  const assigneeOptions = availableAssignees.map(assignee => ({
+    value: assignee.id,
+    label: assignee.name
+  }));
   const statusOptions = taskStatusOptions.map(status => ({ value: status, label: status }));
 
   return (
@@ -80,14 +105,25 @@ const TaskCard = ({ task, isEditing, taskStatusOptions, onClose, availableAssign
             <div className={` ${isEditing ? 'w-[80%]' : 'w-[100%]'}`}>
               <div className=''>
                 <h2 className='text-[30px] font-semibold mb-2 text-[#0052CC]'>{isEditing ? 'Edit Task' : 'Add Task'}</h2>
-                <p className='font-semibold mb-2'>Task Name:</p>
-                <input
-                  type='text'
-                  className='text-sm w-full p-2 mb-2 bg-[#ffffff] border-2 text-black focus:outline-none focus:ring-2 focus:ring-blue-500 rounded'
-                  placeholder='Task title...'
-                  value={taskTitle}
-                  onChange={(e) => setTaskTitle(e.target.value)}
-                />
+                <div>
+                  <div className='flex flex-row mb-2'>
+                    <p className='font-semibold  mr-4'>Task Title:</p>
+                    {submitted && taskTitle.trim() === '' && (
+                      <div className='flex items-center'>
+                        <RiErrorWarningFill className='text-red-500 text-[14px] mr-1' />
+                        <p className='text-red-500 italic text-[14px]'>Task title is required</p>
+                      </div>
+                    )}
+                  </div>
+                  <input
+                    type='text'
+                    className='text-sm w-full p-2 mb-2 bg-[#ffffff] border-2 text-black focus:outline-none focus:ring-2 focus:ring-blue-500 rounded'
+                    placeholder='Task title...'
+                    value={taskTitle}
+                    onChange={(e) => setTaskTitle(e.target.value)}
+                  />
+                </div>
+
                 <div className='mb-2'>
                   <p className='font-semibold mb-2'>Task Progress:</p>
                   <Select
@@ -97,6 +133,7 @@ const TaskCard = ({ task, isEditing, taskStatusOptions, onClose, availableAssign
                     className='basic-single'
                     classNamePrefix='select'
                     placeholder='Select...'
+                    required
                   />
                 </div>
                 <div>
@@ -104,7 +141,7 @@ const TaskCard = ({ task, isEditing, taskStatusOptions, onClose, availableAssign
                   <Select
                     isMulti
                     options={assigneeOptions}
-                    value={assigneeOptions.filter(option => assignees.includes(option.value))}
+                    value={assignees}
                     onChange={handleAssigneeChange}
                     className='basic-multi-select mb-4'
                     classNamePrefix='select'
@@ -112,13 +149,22 @@ const TaskCard = ({ task, isEditing, taskStatusOptions, onClose, availableAssign
                 </div>
               </div>
               <div className='mb-4'>
-                <p className='font-semibold'>Description:</p>
+                <div className='flex flex-row mb-2'>
+                  <p className='font-semibold mr-4'>Description:</p>
+                  {submitted && taskDescription.trim() === '' && (
+                    <div className='flex items-center'>
+                      <RiErrorWarningFill className='text-red-500 text-[14px] mr-1' />
+                      <p className='text-red-500 italic text-[14px]'>Description is required</p>
+                    </div>
+                  )}
+                </div>
                 <textarea
                   type='text'
                   className='text-sm w-full p-2 bg-[#ffffff] border-2 text-black focus:outline-none focus:ring-2 focus:ring-blue-500 rounded resize-none overflow-hidden'
                   placeholder='Add a description...'
                   value={taskDescription}
                   onChange={handleDescriptionChange}
+                  required
                 />
               </div>
             </div>
