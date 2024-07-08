@@ -4,8 +4,8 @@ const mockProject = {
   _id: "666980f45001805b223206f9",
   name: "Test name's Project",
   admin: "666980f45001805b223206f7",
-  member: [],
-  viewer: [],
+  members: [],
+  viewers: [],
   createdAt: "2024-06-12T11:05:24.963Z",
   updatedAt: "2024-06-12T11:05:24.963Z",
   __v: 0,
@@ -36,7 +36,7 @@ const projectHandlers = [
       if (!params.project_id) {
         return HttpResponse.json(
           { message: "Project ID is required." },
-          { status: 401 },
+          { status: 400 },
         );
       }
 
@@ -57,7 +57,7 @@ const projectHandlers = [
       if (!params.project_id) {
         return HttpResponse.json(
           { message: "Project ID is required." },
-          { status: 401 },
+          { status: 400 },
         );
       } else if (!body.name) {
         return HttpResponse.json(
@@ -82,7 +82,7 @@ const projectHandlers = [
       if (!params.project_id) {
         return HttpResponse.json(
           { message: "Project ID is required." },
-          { status: 401 },
+          { status: 400 },
         );
       }
 
@@ -105,7 +105,7 @@ const projectHandlers = [
       if (!params.project_id) {
         return HttpResponse.json(
           { message: "Project ID is required." },
-          { status: 401 },
+          { status: 400 },
         );
       } else if (!body.name) {
         return HttpResponse.json(
@@ -132,11 +132,16 @@ const projectHandlers = [
       if (!params.project_id) {
         return HttpResponse.json(
           { message: "Project ID is required." },
-          { status: 401 },
+          { status: 400 },
         );
       } else if (!body.user_id) {
         return HttpResponse.json(
-          { message: "User ID is required" },
+          { message: "User ID is required." },
+          { status: 400 },
+        );
+      } else if (!body.role) {
+        return HttpResponse.json(
+          { message: "User role is required." },
           { status: 400 },
         );
       }
@@ -165,6 +170,11 @@ const projectHandlers = [
           { message: "User ID is required" },
           { status: 400 },
         );
+      } else if (!body.role) {
+        return HttpResponse.json(
+          { message: "User role is required." },
+          { status: 400 },
+        );
       }
 
       return HttpResponse.json(
@@ -184,7 +194,7 @@ const projectHandlers = [
       if (!params.project_id) {
         return HttpResponse.json(
           { message: "Project ID is required." },
-          { status: 401 },
+          { status: 400 },
         );
       } else if (!body.user_id) {
         return HttpResponse.json(

@@ -1,6 +1,7 @@
 import { Router } from "express";
 import mongoose from "mongoose";
 import Task from "../models/taskModel.js";
+import User from "../models/userModel.js";
 
 const taskRouter = Router();
 
@@ -47,12 +48,22 @@ taskRouter
   .put(async (req, res) => {
     try {
       const { task_id } = req.params;
-      const { name, desc, status, assignee } = req.body;
+      const { name, desc, status, assignees } = req.body;
 
-      if (!name && !desc && !status && !assignee) {
+      if (!name && !desc && !status && !assignees?.length) {
         return res
           .status(400)
           .json({ message: "At least one field is required." });
+      }
+
+      if (!assignees?.length) {
+        return res
+          .status(400)
+          .json({ message: "At least one assignee is required." });
+      } else if (
+        await assignees.some((assignee) => !User.exists({ name: assignee }))
+      ) {
+        return res.status(404).json({ message: "Assignee does not exist." });
       }
 
       if (status && !["TO DO", "IN PROGRESS", "DONE"].includes(status)) {
@@ -62,7 +73,21 @@ taskRouter
         });
       }
 
-      const result = await Task.findByIdAndUpdate(task_id, req.body, {
+      const newTask = {
+        ...(name && { name }),
+        ...(desc && { desc }),
+        ...(status && { status }),
+        ...(assignees?.length && {
+          assignees: await Promise.all(
+            assignees.map(
+              async (assignee) =>
+                await User.findOne({ name: assignee }).then((user) => user._id),
+            ),
+          ),
+        }),
+      };
+
+      const result = await Task.findByIdAndUpdate(task_id, newTask, {
         new: true,
       });
 

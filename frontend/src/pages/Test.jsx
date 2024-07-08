@@ -1,20 +1,20 @@
-import React from 'react';
+import React from "react";
 import {
   Navbar,
   TaskCard,
   AddCard,
   EditUserCard,
   SuccessToast,
-} from '../components';
+} from "../components";
 
 const Test = () => {
   return (
-    <div className='flex'>
+    <div className="flex">
       {/* <Navbar />
       <EditUserCard /> */}
-      <SuccessToast message='Success!' onClose={() => {}} />
+      <SuccessToast message="Success!" onClose={() => {}} />
     </div>
-  )
-}
+  );
+};
 
 export default Test;

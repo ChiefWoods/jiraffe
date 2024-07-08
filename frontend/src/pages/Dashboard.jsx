@@ -1,110 +1,13 @@
-import React, { useEffect, useState } from 'react';
-import { Navbar, Lane,AddCard, TaskCard  } from '../components';
+import React, { useEffect, useState } from "react";
+import { Navbar, Lane, AddCard, TaskCard } from "../components";
 import { IoIosSettings } from "react-icons/io";
-import Select from 'react-select'
+import Select from "react-select";
 import { FaTasks } from "react-icons/fa";
-
-function getCookie(name) {
-  const cookies = document.cookie.split(';');
-  for (let cookie of cookies) {
-    const [cookieName, cookieValue] = cookie.split('=');
-    if (cookieName.trim() === name) {
-      return cookieValue;
-    }
-  }
-  return null;
-}
-
-async function fetchUsername(token, userID) {
-  try {
-    const response = await fetch(`${import.meta.env.VITE_BACK_END_URL}/user/username/${userID}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    });
-    if (response.ok) {
-      const data = await response.json();
-      return data.username; // Assuming the response provides username under 'username'
-    } else {
-      throw new Error('Failed to fetch username');
-    }
-  } catch (error) {
-    console.error('Error fetching username:', error);
-    throw error; // Propagate the error for handling in the calling code
-  }
-}
-
-async function fetchProject(token, userID) {
-  try {
-    const response = await fetch(`${import.meta.env.VITE_BACK_END_URL}/project/user/${userID}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    });
-    if (response.ok) {
-      const data = await response.json();
-      return {
-        projectID: data._id,
-        projectName: data.names,
-        projectAdmin:data.admins,
-        projectMembers:data.members,
-        projectViewers:data.viewers
-      }; // Assuming the response provides project ID and name
-    } else {
-      throw new Error('Failed to fetch projectid');
-    }
-  } catch (error) {
-    console.error('Error fetching projectid:', error);
-    throw error; // Propagate the error for handling in the calling code
-  }
-}
-
-async function fetchTasks(token, projectID) {
-  try {
-    const response = await fetch(`${import.meta.env.VITE_BACK_END_URL}/project/${projectID}/task`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    });
-    if (response.ok) {
-      const data = await response.json();
-      return data.tasks; // Assuming the response provides tasks array
-    } else {
-      throw new Error('Failed to fetch tasks');
-    }
-  } catch (error) {
-    console.error('Error fetching tasks:', error);
-    throw error; // Propagate the error for handling in the calling code
-  }
-}
-
-async function deleteTask(token,taskID){
-  try{
-    const response=await fetch(`${import.meta.env.VITE_BACK_END_URL}/task/${taskID}`,{
-      method:'DELETE',
-      headers:{
-        'Authorization':`Bearer ${token}`
-      }
-    });
-    if(response.ok){
-      return true;
-    }else
-    {
-      throw new Error('Failed to delete task');
-    }
-  }catch(error){
-    console.error('Error deleting tasks:',error);
-    throw error;
-  }
-}
 
 const SettingsLink = () => {
   const searchParams = new URLSearchParams(location.search);
-  const userId = searchParams.get('userid');
-  const projectId = searchParams.get('projectid');
+  const userId = searchParams.get("userid");
+  const projectId = searchParams.get("projectid");
 
   const navigateToSettings = (e) => {
     e.preventDefault();
@@ -112,9 +15,9 @@ const SettingsLink = () => {
   };
 
   return (
-    <a href="/settings" onClick={navigateToSettings}>
-      <button className="border-slate-400 border-2 bg-white text-slate-400 hover:text-white text-slate-400 mr-5 flex flex-row hover:bg-slate-400 group items-center">
-        <IoIosSettings className='text-2xl mr-1 group-hover:animate-spin' />
+    <a onClick={navigateToSettings}>
+      <button className="group mr-5 flex flex-row items-center border-2 border-slate-400 bg-white text-slate-400 hover:bg-slate-400 hover:text-white">
+        <IoIosSettings className="mr-1 text-2xl group-hover:animate-spin" />
         Settings
       </button>
     </a>
@@ -130,144 +33,248 @@ const Dashboard = () => {
   const [projectAdmin, setprojectAdmin] = useState([]);
   const [tasks, setTasks] = useState([]);
   const [isTaskCardOpen, setisTaskCardOpen] = useState(false);
-  const [isAddCardOpen, setisAddCardOpen] = useState(false); // State to control the modal
-  const [selectedTask,setSelectedTask]=useState(null); //state to manage selected task
-  const [isEditing,setisEditing]=useState(false)
+  const [isAddCardOpen, setisAddCardOpen] = useState(false);
+  const [selectedTask, setSelectedTask] = useState(null);
+  const [isEditing, setisEditing] = useState(false);
   const [userMapping, setUserMapping] = useState({});
 
-
-  const rolesArray = ["Viewer", "Member", "Admin"];
+  const roles = ["Viewer", "Member", "Admin"];
+  const assignees = [...projectMembers, ...projectViewers];
 
   const toggleAddCard = () => {
-    setisAddCardOpen(!isAddCardOpen); // Toggle the state to open or close the modal
+    setisAddCardOpen(!isAddCardOpen);
   };
 
-  useEffect(() => {
-    const token = getCookie('token');
-    const urlParams = new URLSearchParams(window.location.search);
-    const userID = urlParams.get('userid');
-  
-    const fetchData = async () => {
-      try {
-        // Fetch username
-        const username = await fetchUsername(token, userID);
-        setUsername(username);
-  
-        // Fetch project details
-        const projectDetails = await fetchProject(token, userID);
-        const { projectID, projectName, projectMembers, projectViewers, projectAdmin } = projectDetails;
-        setProjectID(projectID);
-        console.log(projectID);
-        setProjectName(projectName);
-        setprojectMembers(projectMembers);
-        setprojectViewers(projectViewers);
-        setprojectAdmin(projectAdmin);
-  
-        // Fetch tasks
-        if (projectID) {
-          const tasks = await fetchTasks(token, projectID);
-          setTasks(tasks);
-        } else {
-          throw new Error('No project ID found');
-        }
-  
-        // Fetch assignee names (users)
-        const response = await fetch(`${import.meta.env.VITE_BACK_END_URL}/user`);
-        const data = await response.json();
-  
-        const mapping = {};
-        data.users.forEach(user => {
-          mapping[user._id] = user.name;
-        });
-        setUserMapping(mapping);
-  
-      } catch (error) {
-        console.error('Error fetching data:', error);
+  function getCookie(name) {
+    const cookies = document.cookie.split(";");
+    for (let cookie of cookies) {
+      const [cookieName, cookieValue] = cookie.split("=");
+      if (cookieName.trim() === name) {
+        return cookieValue;
       }
-    };
-  
-    fetchData();
-  }, []);
-
-  const assignees=[...projectMembers,...projectViewers]
-  const getAssigneeNames=(assigneeIDs)=>{
-    return assigneeIDs.map(id=> userMapping[id] || id)
+    }
+    return null;
   }
- 
 
-  const handleDeleteTask=async(taskID)=>{
-    try{
-      const token=getCookie('token');
-      const isDeleted= await deleteTask(token,taskID);
-      if(isDeleted){
-        setTasks(tasks.filter(task=>task._id !==taskID));
-        console.log('task deleted successfully')
-      }else{
-        console.error('Failed to delete task')
-      }
-    }catch(error){
-      console.error('Error deleting task:',error);
+  async function fetchUsername(token, userID) {
+    const res = await fetch(
+      `${import.meta.env.VITE_BACK_END_URL}/user/${userID}`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    ).catch((err) => console.log(err));
+
+    if (res.ok) {
+      const data = await res.json();
+
+      return data.user.name;
+    } else {
+      throw new Error(data.message);
     }
   }
 
-  const handleTaskClick=(task)=>{
-    setSelectedTask(task);
+  async function fetchProject(token, userID) {
+    const res = await fetch(`${import.meta.env.VITE_BACK_END_URL}/project`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }).catch((err) => console.log(err));
+
+    const data = await res.json();
+
+    return data.projects.find((project) => project.admin.toString() === userID);
+  }
+
+  async function fetchTasks(token, projectID) {
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_BACK_END_URL}/project/${projectID}/task`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      const data = await res.json();
+      return data.tasks;
+    } catch (err) {
+      console.error("Error fetching tasks:", err.message);
+    }
+  }
+
+  async function deleteTask(token, taskID) {
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_BACK_END_URL}/task/${taskID}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      if (res.ok) {
+        setTasks(tasks.filter((task) => task._id !== taskID));
+      } else {
+        const data = await res.json();
+        throw new Error(data.message);
+      }
+    } catch (err) {
+      console.error("Error deleting tasks:", err.message);
+    }
+  }
+
+  const getAssigneeNames = (assigneeIDs) => {
+    return assigneeIDs.map((id) => userMapping[id] || id);
+  };
+
+  const handleDeleteTask = async (taskID) => {
+    const token = getCookie("token");
+    await deleteTask(token, taskID);
+  };
+
+  const handleTaskClick = (task) => {
+    setSelectedTask({
+      ...task,
+      projectID,
+    });
     setisEditing(true);
     setisTaskCardOpen(true);
   };
 
-  const handleAddTaskClick=(laneName)=>{
-    console.log('handleaddtask clicked')
+  const handleAddTaskClick = (laneName) => {
+    console.log("handleaddtask clicked");
     setSelectedTask({
-      status:laneName
+      status: laneName,
+      projectID,
     });
     console.log(selectedTask);
     setisEditing(false);
     setisTaskCardOpen(true);
-    console.log(isTaskCardOpen)
-  }
+    console.log(isTaskCardOpen);
+  };
 
-  const closeTaskCard=()=>{
+  const closeTaskCard = () => {
     setSelectedTask(null);
     setisTaskCardOpen(false);
-  }
+  };
+  178;
 
   const swimlanes = [
-    { name: 'TO DO', icon: 'box', bgcolor: '#DEDCFF', strokecolor: '#81ACFF', textcolor: '#0046AF' },
-    { name: 'IN PROGRESS', icon: 'time', bgcolor: '#FFF6EB', strokecolor: '#FFE4C2', textcolor: '#8F4F00' },
-    { name: 'DONE', icon: 'check', bgcolor: '#E9FFEA', strokecolor: '#AAF0C9', textcolor: '#3A5F3A' }
+    {
+      name: "TO DO",
+      icon: "box",
+      bgcolor: "#DEDCFF",
+      strokecolor: "#81ACFF",
+      textcolor: "#0046AF",
+    },
+    {
+      name: "IN PROGRESS",
+      icon: "time",
+      bgcolor: "#FFF6EB",
+      strokecolor: "#FFE4C2",
+      textcolor: "#8F4F00",
+    },
+    {
+      name: "DONE",
+      icon: "check",
+      bgcolor: "#E9FFEA",
+      strokecolor: "#AAF0C9",
+      textcolor: "#3A5F3A",
+    },
   ];
 
+  useEffect(() => {
+    const token = getCookie("token");
+    const urlParams = new URLSearchParams(window.location.search);
+    const userID = urlParams.get("userid");
+
+    const fetchData = async () => {
+      const username = await fetchUsername(token, userID);
+      setUsername(username);
+
+      const projectDetails = await fetchProject(token, userID);
+      setProjectID(projectDetails._id);
+      setProjectName(projectDetails.name);
+      setprojectMembers(projectDetails.members);
+      setprojectViewers(projectDetails.viewers);
+      setprojectAdmin(projectDetails.admin);
+
+      if (projectDetails._id) {
+        const tasks = await fetchTasks(token, projectDetails._id);
+        setTasks(tasks);
+      } else {
+        throw new Error("No project ID found");
+      }
+
+      const res = await fetch(
+        `${import.meta.env.VITE_BACK_END_URL}/user`,
+      ).catch((err) => console.error(err));
+      const data = await res.json();
+
+      const mapping = {};
+
+      data.users.forEach((user) => {
+        mapping[user._id] = user.name;
+      });
+
+      setUserMapping(mapping);
+    };
+
+    fetchData();
+  }, []);
+
   return (
-    <div className='flex flex-row'>
+    <div className="flex flex-row">
       <Navbar />
       <div className="w-[100%] px-10 py-5">
         <div className="mr-[20px] mt-5 flex flex-row justify-between">
-          <p className="text-[#0052CC] text-[33px] font-semibold">{projectName}</p>
-          <div className='flex flex-row'>
+          <p className="text-[33px] font-semibold text-[#0052CC]">
+            {projectName}
+          </p>
+          <div className="flex flex-row">
             <SettingsLink />
-            <button className="border-[#0052CC] border-2 bg-white text-[#0052CC] hover:bg-[#0052CC] hover:text-white flex flex-row items-center group" onClick={toggleAddCard}>
-              <p className="text-2xl group-hover:animate-bounce mr-1">+</p>
-              <p className='text-[16px]'>Add Task</p>
+            <button
+              className="group flex flex-row items-center border-2 border-[#0052CC] bg-white text-[#0052CC] hover:bg-[#0052CC] hover:text-white"
+              onClick={toggleAddCard}
+            >
+              <p className="mr-1 text-2xl group-hover:animate-bounce">+</p>
+              <p className="text-[16px]">Add Task</p>
             </button>
           </div>
         </div>
 
-        <div className="flex flex-row w-[80%] mt-6">
+        <div className="mt-6 flex w-[80%] flex-row">
           {swimlanes.map((swimlane, index) => (
-            <Lane key={index} lane={swimlane} tasks={tasks.filter(task => task.status === swimlane.name)} onDeleteTask={handleDeleteTask} onTaskClick={handleTaskClick} onAddTaskClick={handleAddTaskClick}/>
+            <Lane
+              key={index}
+              lane={swimlane}
+              tasks={tasks.filter((task) => task.status === swimlane.name)}
+              onDeleteTask={handleDeleteTask}
+              onTaskClick={handleTaskClick}
+              onAddTaskClick={handleAddTaskClick}
+            />
           ))}
         </div>
 
         <AddCard isOpen={isAddCardOpen} onClose={toggleAddCard} />
-        
+
         {selectedTask && (
           <TaskCard
-          task={selectedTask}
-          isEditing={isEditing}
-          taskStatusOptions={['TO DO', 'IN PROGRESS', 'DONE']}
-          onClose={closeTaskCard}
-          availableAssignees={getAssigneeNames(assignees)}
+            task={selectedTask}
+            isEditing={isEditing}
+            taskStatusOptions={["TO DO", "IN PROGRESS", "DONE"]}
+            onClose={closeTaskCard}
+            availableAssignees={getAssigneeNames(assignees)}
+            setTasks={setTasks}
+            userMapping={userMapping}
           />
         )}
       </div>

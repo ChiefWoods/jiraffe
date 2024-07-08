@@ -1,32 +1,34 @@
-import React, { useState, useEffect } from 'react';
-import Select from 'react-select';
-import { MdOutlineClose } from 'react-icons/md';
+import React, { useState, useEffect } from "react";
+import Select from "react-select";
+import { MdOutlineClose } from "react-icons/md";
 
-const TaskCard = ({ task, isEditing, taskStatusOptions, onClose, availableAssignees }) => {
-  const [taskTitle, setTaskTitle] = useState('');
-  const [taskStatus, setTaskStatus] = useState('');
-  const [taskDescription, setTaskDescription] = useState('');
-  const [dateCreated, setDateCreated] = useState('');
+const TaskCard = ({
+  task,
+  isEditing,
+  taskStatusOptions,
+  onClose,
+  availableAssignees,
+  setTasks,
+  userMapping,
+}) => {
+  const [taskTitle, setTaskTitle] = useState("");
+  const [taskStatus, setTaskStatus] = useState("");
+  const [taskDescription, setTaskDescription] = useState("");
+  const [dateCreated, setDateCreated] = useState("");
   const [assignees, setAssignees] = useState([]);
 
   useEffect(() => {
-    if (task) {
-      setTaskTitle(task.name || '');
-      setTaskStatus(task.status || '');
-      setTaskDescription(task.desc || '');
-      setDateCreated(task.createdAt || '');
-      setAssignees(task.assignees || []);
-    } else {
-      setTaskTitle('');
-      setTaskStatus('');
-      setTaskDescription('');
-      setDateCreated('');
-      setAssignees([]);
-    }
+    setTaskTitle(task.name ?? "");
+    setTaskStatus(task.status ?? "");
+    setTaskDescription(task.desc ?? "");
+    setDateCreated(task.createdAt ?? "");
+    setAssignees(
+      userMapping ? task.assignees?.map((id) => userMapping[id]) : [],
+    );
   }, [task]);
 
   const handleStatusChange = (selectedOption) => {
-    setTaskStatus(selectedOption ? selectedOption.value : '');
+    setTaskStatus(selectedOption ? selectedOption.value : "");
   };
 
   const handleDescriptionChange = (event) => {
@@ -34,7 +36,9 @@ const TaskCard = ({ task, isEditing, taskStatusOptions, onClose, availableAssign
   };
 
   const handleAssigneeChange = (selectedOptions) => {
-    setAssignees(selectedOptions ? selectedOptions.map(option => option.value) : []);
+    setAssignees(
+      selectedOptions ? selectedOptions.map((option) => option.value) : [],
+    );
   };
 
   const handleSave = async () => {
@@ -43,115 +47,149 @@ const TaskCard = ({ task, isEditing, taskStatusOptions, onClose, availableAssign
       status: taskStatus,
       desc: taskDescription,
       createdAt: dateCreated,
-      assignees: assignees
+      assignees,
     };
 
     const requestOptions = {
-      method: isEditing ? 'PUT' : 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(taskData)
+      method: isEditing ? "PUT" : "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(taskData),
     };
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_BACK_END_URL}/task${isEditing ? `/${task.id}` : ''}`, requestOptions);
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
+      const res = isEditing
+        ? await fetch(
+            `${import.meta.env.VITE_BACK_END_URL}/task/${task._id}`,
+            requestOptions,
+          )
+        : await fetch(
+            `${import.meta.env.VITE_BACK_END_URL}/project/${task.projectID}/task`,
+            requestOptions,
+          );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message);
       }
       onClose();
-    } catch (error) {
-      console.error('Error saving task:', error);
+      setTasks((prev) => {
+        if (isEditing) {
+          return prev.map((task) =>
+            task._id === data.task._id ? data.task : task,
+          );
+        } else {
+          return [...prev, data.task];
+        }
+      });
+    } catch (err) {
+      console.error(err.message);
     }
   };
 
   const formatDate = (dateString) => {
-    if (!dateString) return '';
+    if (!dateString) return "";
     const date = new Date(dateString);
     return date.toLocaleDateString();
   };
 
-  const assigneeOptions = availableAssignees.map(assignee => ({ value: assignee, label: assignee }));
-  const statusOptions = taskStatusOptions.map(status => ({ value: status, label: status }));
+  const assigneeOptions = availableAssignees.map((assignee) => ({
+    value: assignee,
+    label: assignee,
+  }));
+  const statusOptions = taskStatusOptions.map((status) => ({
+    value: status,
+    label: status,
+  }));
 
   return (
-    <div className='z-40 fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50'>
-      <div className='border-2 mx-auto bg-white px-12 py-6 rounded-md shadow-md flex flex-col w-[50%] h-[65%] max-w-full relative z-50'>
+    <div className="fixed inset-0 z-40 flex items-center justify-center bg-gray-900 bg-opacity-50">
+      <div className="relative z-50 mx-auto flex w-[50%] max-w-full flex-col rounded-md border-2 bg-white px-12 py-6 shadow-md">
         <form>
-          <div className='justify-between flex flex-row h-[90%]'>
-            <div className={` ${isEditing ? 'w-[80%]' : 'w-[100%]'}`}>
-              <div className=''>
-                <h2 className='text-[30px] font-semibold mb-2 text-[#0052CC]'>{isEditing ? 'Edit Task' : 'Add Task'}</h2>
-                <p className='font-semibold mb-2'>Task Name:</p>
+          <div className="flex h-[90%] flex-row justify-between">
+            <div className={` ${isEditing ? "w-[80%]" : "w-[100%]"}`}>
+              <div className="">
+                <h2 className="mb-2 text-[30px] font-semibold text-[#0052CC]">
+                  {isEditing ? "Edit Task" : "Add Task"}
+                </h2>
+                <p className="mb-2 font-semibold">Task Name:</p>
                 <input
-                  type='text'
-                  className='text-sm w-full p-2 mb-2 bg-[#ffffff] border-2 text-black focus:outline-none focus:ring-2 focus:ring-blue-500 rounded'
-                  placeholder='Task title...'
+                  type="text"
+                  className="mb-2 w-full rounded border-2 bg-[#ffffff] p-2 text-sm text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Task title..."
                   value={taskTitle}
                   onChange={(e) => setTaskTitle(e.target.value)}
                 />
-                <div className='mb-2'>
-                  <p className='font-semibold mb-2'>Task Progress:</p>
+                <div className="mb-2">
+                  <p className="mb-2 font-semibold">Task Progress:</p>
                   <Select
                     options={statusOptions}
-                    value={statusOptions.find(option => option.value === taskStatus)}
+                    value={statusOptions.find(
+                      (option) => option.value === taskStatus,
+                    )}
                     onChange={handleStatusChange}
-                    className='basic-single'
-                    classNamePrefix='select'
-                    placeholder='Select...'
+                    className="basic-single"
+                    classNamePrefix="select"
+                    placeholder="Select..."
                   />
                 </div>
                 <div>
-                  <p className='font-semibold mb-2'>Assignee:</p>
+                  <p className="mb-2 font-semibold">Assignee:</p>
                   <Select
                     isMulti
                     options={assigneeOptions}
-                    value={assigneeOptions.filter(option => assignees.includes(option.value))}
+                    value={assigneeOptions.filter((option) =>
+                      assignees?.includes(option.value),
+                    )}
                     onChange={handleAssigneeChange}
-                    className='basic-multi-select mb-4'
-                    classNamePrefix='select'
+                    className="basic-multi-select mb-4"
+                    classNamePrefix="select"
                   />
                 </div>
               </div>
-              <div className='mb-4'>
-                <p className='font-semibold'>Description:</p>
+              <div className="mb-4">
+                <p className="font-semibold">Description:</p>
                 <textarea
-                  type='text'
-                  className='text-sm w-full p-2 bg-[#ffffff] border-2 text-black focus:outline-none focus:ring-2 focus:ring-blue-500 rounded resize-none overflow-hidden'
-                  placeholder='Add a description...'
+                  type="text"
+                  className="w-full resize-none overflow-hidden rounded border-2 bg-[#ffffff] p-2 text-sm text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Add a description..."
                   value={taskDescription}
                   onChange={handleDescriptionChange}
                 />
               </div>
             </div>
             {isEditing && (
-              <div className='mt-6 mr-6 '>
-                <div className='mb-4'>
-                  <p className='text-gray-700 font-semibold'>Created:</p>
-                  <p className='text-sm text-gray-500'>{dateCreated ? formatDate(dateCreated) : 'N/A'}</p>
+              <div className="mr-6 mt-6">
+                <div className="mb-4">
+                  <p className="font-semibold text-gray-700">Created:</p>
+                  <p className="text-sm text-gray-500">
+                    {dateCreated ? formatDate(dateCreated) : "N/A"}
+                  </p>
                 </div>
               </div>
             )}
           </div>
-          <div className={` ${isEditing ? 'w-[80%]' : 'w-[100%]'}`}>
-            <div className='float-end'>
+          <div className={` ${isEditing ? "w-[80%]" : "w-[100%]"}`}>
+            <div className="float-end">
               <button
-                type='button'
-                className='bg-slate-400 hover:bg-slate-500 text-white py-2 px-4 rounded-md'
+                type="button"
+                className="rounded-md bg-slate-400 px-4 py-2 text-white hover:bg-slate-500"
                 onClick={onClose}
               >
                 Cancel
               </button>
               <button
-                type='button'
-                className='bg-blue-600 hover:bg-[#0052CC] text-white py-2 px-4 rounded-md ml-3'
+                type="button"
+                className="ml-3 rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-[#0052CC]"
                 onClick={handleSave}
               >
-                {isEditing ? 'Done' : 'Add'}
+                {isEditing ? "Done" : "Add"}
               </button>
             </div>
           </div>
         </form>
         <MdOutlineClose
-          className='absolute top-4 right-4 font-bold text-slate-400 hover:text-slate-500 text-[35px] cursor-pointer'
+          className="absolute right-4 top-4 cursor-pointer text-[35px] font-bold text-slate-400 hover:text-slate-500"
           onClick={onClose}
         />
       </div>

@@ -44,7 +44,7 @@ const taskHandlers = [
 
       const body = await request.json();
 
-      if (!body.name && !body.desc && !body.status && !body.assignee) {
+      if (!body.name && !body.desc && !body.status && !body.assignees?.length) {
         return HttpResponse.json(
           { message: "At least one field is required." },
           { status: 400 },

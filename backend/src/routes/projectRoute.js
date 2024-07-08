@@ -131,17 +131,23 @@ projectRouter
   .post(async (req, res) => {
     try {
       const { project_id } = req.params;
-      const { name, desc, status, assignee } = req.body;
+      const { name, desc, status, assignees } = req.body;
 
       if (!name) {
         return res.status(400).json({ message: "Name is required." });
-      } else if (!assignee) {
-        return res.status(400).json({ message: "Assignee is required." });
-      } else if (!mongoose.Types.ObjectId.isValid(assignee)) {
-        return res.status(400).json({ message: "Assignee is not valid." });
-      } else if (!(await User.findById(assignee))) {
+      }
+
+      if (!assignees?.length) {
+        return res
+          .status(400)
+          .json({ message: "At least one assignee is required." });
+      } else if (
+        await assignees.some((assignee) => !User.exists({ name: assignee }))
+      ) {
         return res.status(404).json({ message: "Assignee does not exist." });
-      } else if (status && !["TO DO", "IN PROGRESS", "DONE"].includes(status)) {
+      }
+
+      if (status && !["TO DO", "IN PROGRESS", "DONE"].includes(status)) {
         return res.status(400).json({
           message:
             "Only status of 'TO DO', 'IN PROGRESS' and 'DONE' are allowed.",
@@ -159,7 +165,13 @@ projectRouter
         name,
         desc: desc || "",
         status: status || "TO DO",
-        assignee,
+        assignees: await Promise.all(
+          assignees.map(async (assignee) => {
+            return await User.findOne({ name: assignee }).then(
+              (user) => user._id,
+            );
+          }),
+        ),
       });
 
       await task.save();
@@ -175,7 +187,6 @@ projectRouter
   .all(checkProjectIdParam, checkUserIdBody)
   // Add user to project
   .post(async (req, res) => {
-    // TODO
     try {
       const { project_id } = req.params;
       const { user_id, role } = req.body;
@@ -191,7 +202,7 @@ projectRouter
       }
 
       if (
-        project.admin.toString() !== user_id ||
+        project.admin.toString() === user_id ||
         project.members.includes(user_id) ||
         project.viewers.includes(user_id)
       ) {
@@ -252,11 +263,9 @@ projectRouter
           (member) => member.toString() !== user_id,
         );
       } else if (role === "admin") {
-        return res
-          .status(400)
-          .json({
-            message: "Only one admin role is allowed and cannot be reassigned.",
-          });
+        return res.status(400).json({
+          message: "Only one admin role is allowed and cannot be reassigned.",
+        });
       } else {
         return res
           .status(400)

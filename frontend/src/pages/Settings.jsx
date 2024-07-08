@@ -1,16 +1,12 @@
-import React from 'react';
-import {
-  Navbar,
-  UpdateProject,
-  AccessTable
-} from '../components';
+import React from "react";
+import { Navbar, UpdateProject, AccessTable } from "../components";
 
 const Settings = () => {
   return (
     <div className="flex flex-row">
       <Navbar />
-      <div className="w-full px-10 py-5 flex justify-center">
-        <div className="flex flex-col w-full max-w-screen-lg">
+      <div className="flex w-full justify-center px-10 py-5">
+        <div className="flex w-full max-w-screen-lg flex-col">
           {/* Project Settings */}
           <UpdateProject />
           {/* Access Control */}
