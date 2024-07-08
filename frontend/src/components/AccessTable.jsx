@@ -30,26 +30,22 @@ function getCookie(name) {
   return null;
 }
 
-async function fetchProjectID(token, userID) {
+async function getProjectRole(userID, projectID) {
   try {
-    const response = await fetch(`${import.meta.env.VITE_BACK_END_URL}/project/user/${userID}`, {
+    const response = await fetch(`${import.meta.env.VITE_BACK_END_URL}/project/role/${userID}/${projectID}`, {
       method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
     });
+
     if (response.ok) {
       const data = await response.json();
-      return {
-        projectID: data.projectID,
-        projectName: data.projectName
-      };
+      return data.role;
     } else {
-      throw new Error('Failed to fetch projectid');
+      console.error('Failed to fetch project role:', response.statusText);
+      throw new Error('Failed to fetch project role');
     }
   } catch (error) {
-    console.error('Error fetching projectid:', error);
-    throw error;
+    console.error('Error fetching project role:', error);
+    throw new Error('Error fetching project role');
   }
 }
 
@@ -126,6 +122,7 @@ const AccessTable = () => {
   const [isEditCardOpen, setIsEditCardOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [showToast, setShowToast] = useState(false);
+  const [userRole, setUserRole] = useState(null);
 
   const toggleAddCard = () => {
     setIsAddCardOpen(!isAddCardOpen);
@@ -194,6 +191,9 @@ const AccessTable = () => {
           const project = await fetchProject(token, projectID);
           const allUsers = await parseUserDetails(project, token);
           setUsers(allUsers);
+
+          const role = await getProjectRole(userID, projectID);
+          setUserRole(role);
         } catch (error) {
           console.error('Error fetching data:', error);
         }
@@ -248,7 +248,12 @@ const AccessTable = () => {
     <div className='mt-8 flex flex-col'>
       <div className='flex mt-8 ml-2 justify-between w-[930px]'>
         <p className='font-bold text-3xl text-blue-700 mb-8'>Access</p>
-        <button className='bg-blue-700 text-white w-[110px] p-0 rounded h-[34px] text-base hover:scale-105' onClick={toggleAddCard}>Add User</button>
+        {userRole === 'admin' ? (
+          <button className='bg-blue-700 text-white w-[110px] p-0 rounded h-[34px] text-base hover:scale-105' onClick={toggleAddCard}>Add User</button>
+        ) : (
+          // Disabled button
+          <button className='bg-gray-300 text-white w-[110px] p-0 rounded h-[34px] text-base hover:scale-105' disabled>Add User</button>
+        )}
       </div>
       <table className='w-[1110px] table-auto border-collapse ml-4'>
         <thead>
@@ -268,7 +273,11 @@ const AccessTable = () => {
                 <span className={roleStyles[user.role]}>{user.role}</span>
               </td>
               <td className='py-2 w-[170px]'>
-                {renderActions(user)}
+                {userRole === 'admin' ? (
+                  renderActions(user)
+                ) : (
+                  <p className='mr-2 p-[20px]'> </p>
+                )}
               </td>
             </tr>
           ))}
