@@ -35,9 +35,9 @@ async function fetchUsername(token, userID) {
   }
 }
 
-async function fetchProject(token, userID) {
+async function fetchProject(token, projID) {
   try {
-    const response = await fetch(`${import.meta.env.VITE_BACK_END_URL}/project/user/${userID}`, {
+    const response = await fetch(`${import.meta.env.VITE_BACK_END_URL}/project/${projID}`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`
@@ -46,11 +46,11 @@ async function fetchProject(token, userID) {
     if (response.ok) {
       const data = await response.json();
       return {
-        projectID: data._id,
-        projectName: data.name,
-        projectAdmin:data.admins,
-        projectMembers:data.members,
-        projectViewers:data.viewers
+        projectID: data.project._id,
+        projectName: data.project.name,
+        projectAdmin:data.project.admins,
+        projectMembers:data.project.members,
+        projectViewers:data.project.viewers
       }; // Assuming the response provides project ID and name
     } else {
       throw new Error('Failed to fetch projectid');
@@ -146,6 +146,7 @@ const Dashboard = () => {
     const token = getCookie('token');
     const urlParams = new URLSearchParams(window.location.search);
     const userID = urlParams.get('userid');
+    const projID = urlParams.get('projectid')
   
     const fetchData = async () => {
       try {
@@ -154,8 +155,9 @@ const Dashboard = () => {
         setUsername(username);
   
         // Fetch project details
-        const projectDetails = await fetchProject(token, userID);
+        const projectDetails = await fetchProject(token, projID);
         const { projectID, projectName, projectMembers, projectViewers, projectAdmin } = projectDetails;
+        console.log(projectDetails);
         setProjectID(projectID);
         console.log(projectID);
         setProjectName(projectName);
@@ -164,7 +166,7 @@ const Dashboard = () => {
         setprojectAdmin(projectAdmin);
   
         // Fetch tasks
-        if (projectID) {
+        if (projID) {
           const tasks = await fetchTasks(token, projectID);
           setTasks(tasks);
         } else {
