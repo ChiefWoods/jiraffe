@@ -1,8 +1,18 @@
 {
-  "devDependencies": {
-    "tailwindcss": "^3.4.4"
+  "name": "jiraffe-task-management",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "test": "cd backend; npm run test",
+    "start:frontend": "cd frontend; npm run dev",
+    "start:backend": "cd backend; npm run start",
+    "build": "cd frontend; npm run build"
   },
-  "dependencies": {
-    "react-icons": "^5.2.1"
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "husky": "^9.0.11",
+    "lint-staged": "^15.2.7"
   }
 }
