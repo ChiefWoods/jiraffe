@@ -44,7 +44,7 @@ async function updateProjectName(projectID, projectName) {
     });
 
     if (response.ok) {
-      return 'Project name updated successfully';
+      return 'Project name updated';
     } else {
       const data = await response.json();
       throw new Error(data.message);
