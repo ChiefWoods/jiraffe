@@ -1,18 +1,20 @@
 {
-  "name": "gira-task-management",
+  "name": "jiraffe-backend",
+  "private": true,
   "version": "1.0.0",
-  "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "prepare": "husky"
+    "test": "vitest",
+    "start": "nodemon src/server.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "mongodb": "^6.7.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
     "mongoose": "^8.4.1",
     "nodemon": "^3.1.2",
     "react": "^18.3.1",
@@ -20,11 +22,15 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.4.0",
+    "bcrypt": "^5.1.1",
     "eslint": "^9.4.0",
     "eslint-config-prettier": "^9.1.0",
     "globals": "^15.3.0",
     "husky": "^9.0.11",
+    "jsonwebtoken": "^9.0.2",
     "lint-staged": "^15.2.5",
-    "prettier": "^3.3.0"
+    "msw": "^2.3.1",
+    "prettier": "^3.3.0",
+    "vitest": "^1.6.0"
   }
 }
