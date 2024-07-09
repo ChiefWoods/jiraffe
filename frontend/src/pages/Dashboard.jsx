@@ -35,9 +35,9 @@ async function fetchUsername(token, userID) {
   }
 }
 
-async function fetchProject(token, userID) {
+async function fetchProject(token, projID) {
   try {
-    const response = await fetch(`${import.meta.env.VITE_BACK_END_URL}/project/user/${userID}`, {
+    const response = await fetch(`${import.meta.env.VITE_BACK_END_URL}/project/${projID}`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`
@@ -46,11 +46,11 @@ async function fetchProject(token, userID) {
     if (response.ok) {
       const data = await response.json();
       return {
-        projectID: data._id,
-        projectName: data.name,
-        projectAdmin:data.admins,
-        projectMembers:data.members,
-        projectViewers:data.viewers
+        projectID: data.project._id,
+        projectName: data.project.name,
+        projectAdmin:data.project.admin,
+        projectMembers:data.project.members,
+        projectViewers:data.project.viewers
       }; // Assuming the response provides project ID and name
     } else {
       throw new Error('Failed to fetch projectid');
@@ -101,6 +101,25 @@ async function deleteTask(token,taskID){
   }
 }
 
+async function getProjectRole(userID, projectID) {
+  try {
+    const response = await fetch(`${import.meta.env.VITE_BACK_END_URL}/project/role/${userID}/${projectID}`, {
+      method: 'GET',
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      return data.role;
+    } else {
+      console.error('Failed to fetch project role:', response.statusText);
+      throw new Error('Failed to fetch project role');
+    }
+  } catch (error) {
+    console.error('Error fetching project role:', error);
+    throw new Error('Error fetching project role');
+  }
+}
+
 const SettingsLink = () => {
   const searchParams = new URLSearchParams(location.search);
   const userId = searchParams.get('userid');
@@ -113,7 +132,7 @@ const SettingsLink = () => {
 
   return (
     <a href="/settings" onClick={navigateToSettings}>
-      <button className="border-slate-400 border-2 bg-white text-slate-400 hover:text-white text-slate-400 mr-5 flex flex-row hover:bg-slate-400 group items-center">
+      <button className="h-[52px] border-slate-400 border-2 bg-white text-slate-400 hover:text-white text-slate-400 mr-5 flex flex-row hover:bg-slate-400 group items-center">
         <IoIosSettings className='text-2xl mr-1 group-hover:animate-spin' />
         Settings
       </button>
@@ -134,6 +153,7 @@ const Dashboard = () => {
   const [selectedTask,setSelectedTask]=useState(null); //state to manage selected task
   const [isEditing,setisEditing]=useState(false)
   const [userMapping, setUserMapping] = useState({});
+  const [userRole,setUserRole]=useState('');
 
 
   const rolesArray = ["Viewer", "Member", "Admin"];
@@ -146,6 +166,7 @@ const Dashboard = () => {
     const token = getCookie('token');
     const urlParams = new URLSearchParams(window.location.search);
     const userID = urlParams.get('userid');
+    const projID = urlParams.get('projectid')
   
     const fetchData = async () => {
       try {
@@ -154,17 +175,23 @@ const Dashboard = () => {
         setUsername(username);
   
         // Fetch project details
-        const projectDetails = await fetchProject(token, userID);
+        const projectDetails = await fetchProject(token, projID);
         const { projectID, projectName, projectMembers, projectViewers, projectAdmin } = projectDetails;
+        console.log(projectDetails);
         setProjectID(projectID);
         console.log(projectID);
         setProjectName(projectName);
         setprojectMembers(projectMembers);
         setprojectViewers(projectViewers);
         setprojectAdmin(projectAdmin);
+
+        const usrRole = await getProjectRole(userID, projID);
+        setUserRole(usrRole);
+        console.log(usrRole);
+
   
         // Fetch tasks
-        if (projectID) {
+        if (projID) {
           const tasks = await fetchTasks(token, projectID);
           setTasks(tasks);
         } else {
@@ -189,7 +216,7 @@ const Dashboard = () => {
     fetchData();
   }, []);
 
-  const assignees=[...projectMembers,...projectViewers]
+  const assignees=[projectAdmin, ...projectMembers,...projectViewers]
   const getAssignees = (assigneeIDs) => {
     return assigneeIDs.map(id => ({
       id,
@@ -197,7 +224,6 @@ const Dashboard = () => {
     }));
   };
  
-
   const handleDeleteTask=async(taskID)=>{
     try{
       const token=getCookie('token');
@@ -251,16 +277,30 @@ const Dashboard = () => {
           <p className="text-[#0052CC] text-[33px] font-semibold">{projectName}</p>
           <div className='flex flex-row'>
             <SettingsLink />
-            <button className="border-[#0052CC] border-2 bg-white text-[#0052CC] hover:bg-[#0052CC] hover:text-white flex flex-row items-center group" onClick={() => handleAddTaskClick('TO DO', projectID)}>
-              <p className="text-2xl group-hover:animate-bounce mr-1">+</p>
-              <p className='text-[16px]'>Add Task</p>
-            </button>
+            {userRole==='viewer'?
+              (
+                <button className={`h-[52px] border-[#0052CC] border-2 bg-white text-[#0052CC] hover:bg-[#0052CC] cursor-not-allowed hover:text-white flex flex-row items-center group opacity-50`} disabled  >
+                <p className="text-2xl group-hover:animate-bounce mr-1">+</p>
+                <p className='text-[16px]'>Add Task</p>
+              </button>
+              ):
+              (
+                <button className={`h-[52px] border-[#0052CC] border-2 bg-white text-[#0052CC] hover:bg-[#0052CC] hover:text-white flex flex-row items-center group`} onClick={() => handleAddTaskClick('TO DO', projectID)}>
+                  <p className="text-2xl group-hover:animate-bounce mr-1">+</p>
+                  <p className='text-[16px]'>Add Task</p>
+                </button>
+              )
+              
+            }
+            
+
+            
           </div>
         </div>
 
         <div className="flex flex-row w-[80%] mt-6">
           {swimlanes.map((swimlane, index) => (
-            <Lane key={index} lane={swimlane} tasks={tasks.filter(task => task.status === swimlane.name)} onDeleteTask={handleDeleteTask} onTaskClick={handleTaskClick} onAddTaskClick={(laneName) => handleAddTaskClick(laneName, projectID)}/>
+            <Lane key={index} lane={swimlane} userRole={userRole} tasks={tasks.filter(task => task.status === swimlane.name)} onDeleteTask={handleDeleteTask} onTaskClick={handleTaskClick} onAddTaskClick={(laneName) => handleAddTaskClick(laneName, projectID)}/>
           ))}
         </div>
 
@@ -274,6 +314,7 @@ const Dashboard = () => {
           onClose={closeTaskCard}
           availableAssignees={getAssignees(assignees)}
           projectID={projectID}
+        
           />
         )}
       </div>

@@ -3,7 +3,7 @@ import Select from 'react-select';
 import { MdOutlineClose } from 'react-icons/md';
 import { RiErrorWarningFill } from "react-icons/ri";
 
-const TaskCard = ({ task, isEditing, taskStatusOptions, onClose, availableAssignees, projectID }) => {
+const TaskCard = ({ task, isEditing, taskStatusOptions, onClose, availableAssignees, projectID,userRole }) => {
   const [taskTitle, setTaskTitle] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [taskStatus, setTaskStatus] = useState('');
