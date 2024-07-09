@@ -60,20 +60,20 @@ async function getProjectById(projectId) {
   }
 }
 
-const DashboardLink = () => {
+const navigateToDashboard = (e) => {
   const searchParams = new URLSearchParams(window.location.search);
   const userId = searchParams.get('userid');
   const projectId = searchParams.get('projectid');
 
-  const navigateToDashboard = (e) => {
-    e.preventDefault();
-    window.location.href = `/dashboard?userid=${userId}&projectid=${projectId}`;
-  }
+  e.preventDefault();
+  window.location.href = `/dashboard?userid=${userId}&projectid=${projectId}`;
+}
 
+const DashboardLink = () => {
   return (
     <li className="flex items-center mr-2 hover:scale-105 tracking-wide">
       <span>
-        <MdDashboard className="text-white text-2xl mx-2" />
+        <MdDashboard className="text-white text-2xl ml-[8px] mr-[4px]" />
       </span>
       <a href="/dashboard" className="text-white hover:text-white ml-2" onClick={navigateToDashboard}>
         Dashboard
@@ -153,24 +153,27 @@ const Navbar = () => {
   return (
     <>
       {showToast && <SuccessToast message="Project changed successfully" onClose={dismissToast} />}
-      <div className="z-10 flex flex-col h-screen bg-[#0052CC] w-[230px] top-0 left-0 px-0 py-6">
-        <img src={logo_blue} alt="Logo" className="w-48 mb-4" />
-        <ul className="text-white-500 mx-2 pl-0 ml-2">
+      <div className="items-center z-10 flex flex-col h-screen bg-[#0052CC] w-[240px] top-0 left-0 py-6">
+        <a onClick={navigateToDashboard} className="cursor-pointer">
+          <img src={logo_blue} alt="Logo" className="w-48" />
+        </a>
+        {/* app name */}
+        <p className="text-white font-bold text-[20px] mb-[60px] font-mono tracking-wide cursor-default">Jiraffe.</p>
+        <ul className="text-white-500">
           {currentProject && (
-            <li key={currentProject._id} className="mb-2 bg-[#0052CC] text-white tracking-wide">
-              <button
-                className="block w-full text-left bg-[#0052CC] font-extrabold focus:outline-none"
-              >
+            <li key={currentProject._id} className="mb-[20px] text-white text-center tracking-wider cursor-default">
+              <p
+                className="block w-full bg-blue-600 font-bold py-[6px] px-[20px] focus:outline-none rounded-[16px] text-[15px]">
                 {currentProject.name}
-              </button>
+              </p>
             </li>
           )}
           {projects.map((project, index) => (
-            <li key={index} className="mb-2 bg-[#0052CC] text-white hover:scale-105 tracking-wide">
+            <li key={index} className="mb-2 text-white hover:scale-105 tracking-wider">
               <button
-                className={`block w-full text-left bg-[#0052CC] ${
-                  project === currentProject ? "font-extrabold" : "font-light"
-                } focus:outline-none`}
+                className={`block w-full text-left bg-transparent ${
+                  project === currentProject ? "font-bold" : "font-light"
+                } focus:outline-none text-[14px]`}
                 onClick={() => navigateToAnotherProject(project._id)}
               >
                 {project.name}
@@ -179,15 +182,15 @@ const Navbar = () => {
           ))}
         </ul>
         <div className="flex-grow flex flex-col justify-end mb-6">
-          <ul className="flex flex-col space-y-[24px] ml-6">
-            <li className="flex items-center mr-2">
-              <p className="bg-blue-500 text-white font-bold px-4 py-2 rounded-full text-sm tracking-wider w-[140px] ml-[4px] text-center">{userName}</p>
+          <ul className="flex flex-col space-y-[30px]">
+            <li className="mb-[10px] flex items-center mr-2 cursor-default">
+              <p className="text-[24px] bg-blue-600 text-white font-bold px-4 py-2 rounded-full text-sm tracking-wider w-[140px] ml-[4px] text-center">{userName}</p>
             </li>
             <DashboardLink />
             <li className="flex items-center mr-2 tracking-wide">
-              <button className="flex items-center bg-white text-[#0052CC] hover:scale-105 ml-1 px-2 py-1 rounded-lg w-[140px] transition-colors duration-300" onClick={handleLogout}>
+              <button className="mb-[20px] flex items-center bg-white text-[#0052CC] hover:scale-105 ml-1 px-2 py-1 rounded-lg w-[140px] transition-colors duration-300" onClick={handleLogout}>
                 <span>
-                  <IoIosUndo className="text-2xl mr-3" />
+                  <IoIosUndo className="text-2xl mr-[16px]" />
                 </span>
                 <p className="text-base font-bold">Log Out</p>
               </button>
