@@ -252,7 +252,7 @@ const AccessTable = () => {
           <button className='bg-blue-700 text-white w-[110px] p-0 rounded h-[34px] text-base hover:scale-105' onClick={toggleAddCard}>Add User</button>
         ) : (
           // Disabled button
-          <button className='bg-gray-300 text-white w-[110px] p-0 rounded h-[34px] text-base hover:scale-105' disabled>Add User</button>
+          <button className='bg-gray-300 text-white w-[110px] p-0 rounded h-[34px] text-base cursor-not-allowed' disabled>Add User</button>
         )}
       </div>
       <table className='w-[1110px] table-auto border-collapse ml-4'>

@@ -141,7 +141,7 @@ const Register = () => {
 							</div>
 
 							<div className="text-center  mt-6 md:mt-8">
-								<button className="bg-green-400 mb-3 flex justify-center  mx-auto items-center rounded-3xl  mb-2 text-white shadow-md hover:scale-105 ">
+								<button className="bg-green-500 mb-3 flex justify-center  mx-auto items-center rounded-3xl  mb-2 text-white shadow-md hover:scale-105 w-[200px]">
 									<span className="mr-[3px]">Sign Up!</span>
 									<FaCheckCircle />
 								</button>
