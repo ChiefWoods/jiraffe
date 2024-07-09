@@ -6,7 +6,7 @@ import { FaRegCheckSquare } from "react-icons/fa";
 import TaskItem  from './TaskItem ';
 import TaskCard from './TaskCard'; // Import TaskCard component
 
-const Lane = ({ lane, tasks, onDeleteTask, onTaskClick, onAddTaskClick }) => {
+const Lane = ({ lane, tasks,userRole ,onDeleteTask, onTaskClick, onAddTaskClick }) => {
 
   let Icon;
   switch (lane.icon) {
@@ -44,17 +44,27 @@ const Lane = ({ lane, tasks, onDeleteTask, onTaskClick, onAddTaskClick }) => {
             <p className='mb-4 text-[20px] font-medium'>{lane.name}</p>
           </div>
           {tasks.map((task, index) => (
-              <TaskItem  key={task._id} task={task} onDeleteTask={onDeleteTask} onTaskClick={() => onTaskClick(task)} />
+              <TaskItem  key={task._id} task={task} onDeleteTask={onDeleteTask} userRole={userRole} onTaskClick={() => onTaskClick(task)} />
           ))}
         </div>
       </div>
 
       {/* "+" button */}
-      <div className="justify-center text-center content-center mt-4">
+      {userRole==='viewer'?(
+        <div className="justify-center text-center content-center mt-4">
+        <div className='bg-[#0052CC] rounded-3xl w-[40px] h-[40px] mx-auto flex text-center text-white text-[35px] justify-center items-center hover:bg-blue-600 hover:cursor-not-allowed transition-transform duration-300 hover:scale-110 opacity-50'>
+          +
+        </div>
+      </div>
+      ):(
+        <div className="justify-center text-center content-center mt-4">
         <div className='bg-[#0052CC] rounded-3xl w-[40px] h-[40px] mx-auto flex text-center text-white text-[35px] justify-center items-center hover:bg-blue-600 hover:cursor-pointer transition-transform duration-300 hover:scale-110' onClick={handleAddTaskClick}>
           +
         </div>
       </div>
+      )}
+      
+      
     </div>
   );
 }
