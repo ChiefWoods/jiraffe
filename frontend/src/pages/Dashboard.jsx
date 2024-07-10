@@ -132,7 +132,7 @@ const SettingsLink = () => {
 
   return (
     <a href="/settings" onClick={navigateToSettings}>
-      <button className="h-[52px] border-slate-400 border-2 bg-white text-slate-400 hover:text-white text-slate-400 mr-5 flex flex-row hover:bg-slate-400 group items-center">
+      <button className="h-[52px]  border-slate-600 border-2 bg-white text-slate-600 hover:text-white text-slate-600 mr-5 flex flex-row hover:bg-slate-600 group items-center">
         <IoIosSettings className='text-2xl mr-1 group-hover:animate-spin' />
         Settings
       </button>
@@ -177,9 +177,7 @@ const Dashboard = () => {
         // Fetch project details
         const projectDetails = await fetchProject(token, projID);
         const { projectID, projectName, projectMembers, projectViewers, projectAdmin } = projectDetails;
-        console.log(projectDetails);
         setProjectID(projectID);
-        console.log(projectID);
         setProjectName(projectName);
         setprojectMembers(projectMembers);
         setprojectViewers(projectViewers);
@@ -187,7 +185,6 @@ const Dashboard = () => {
 
         const usrRole = await getProjectRole(userID, projID);
         setUserRole(usrRole);
-        console.log(usrRole);
 
   
         // Fetch tasks
@@ -246,16 +243,12 @@ const Dashboard = () => {
   };
 
   const handleAddTaskClick=(laneName,projectID)=>{
-    console.log('handleaddtask clicked')
-    console.log(projectID);
     setSelectedTask({
       status:laneName,
       projectID
     });
-    console.log(selectedTask);
     setisEditing(false);
     setisTaskCardOpen(true);
-    console.log(isTaskCardOpen)
   }
 
   const closeTaskCard=()=>{
@@ -274,27 +267,21 @@ const Dashboard = () => {
       <Navbar />
       <div className="w-[100%] px-10 py-5">
         <div className="mr-[20px] mt-5 flex flex-row justify-between">
-          <p className="text-[#0052CC] text-[33px] font-semibold">{projectName}</p>
+          <p className="mt-[12px] text-[#0052CC] text-[30px] font-semibold">{projectName}</p>
           <div className='flex flex-row'>
             <SettingsLink />
-            {userRole==='viewer'?
-              (
+            {userRole==='viewer' ? (
                 <button className={`h-[52px] border-[#0052CC] border-2 bg-white text-[#0052CC] hover:bg-[#0052CC] cursor-not-allowed hover:text-white flex flex-row items-center group opacity-50`} disabled  >
-                <p className="text-2xl group-hover:animate-bounce mr-1">+</p>
-                <p className='text-[16px]'>Add Task</p>
-              </button>
-              ):
-              (
+                  <p className="text-2xl mr-1">+</p>
+                  <p className='text-[16px]'>Add Task</p>
+                </button>
+              ) : (
                 <button className={`h-[52px] border-[#0052CC] border-2 bg-white text-[#0052CC] hover:bg-[#0052CC] hover:text-white flex flex-row items-center group`} onClick={() => handleAddTaskClick('TO DO', projectID)}>
-                  <p className="text-2xl group-hover:animate-bounce mr-1">+</p>
+                  <p className="text-2xl mr-1">+</p>
                   <p className='text-[16px]'>Add Task</p>
                 </button>
               )
-              
             }
-            
-
-            
           </div>
         </div>
 

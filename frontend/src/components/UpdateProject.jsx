@@ -44,7 +44,7 @@ async function updateProjectName(projectID, projectName) {
     });
 
     if (response.ok) {
-      return 'Project name updated successfully';
+      return 'Project name updated';
     } else {
       const data = await response.json();
       throw new Error(data.message);
@@ -185,21 +185,38 @@ const UpdateProject = () => {
           <div className='flex ml-2'>
             <div className='flex flex-col mr-8'>
               <label className='font-semibold text-lg text-black mb-2' htmlFor="project-name">Project Name</label>
-              <input 
-                className='border border-gray-300 w-[440px] p-2 rounded' 
-                type="text" 
-                id="project-name" 
-                name="project-name" 
-                value={projectName}
-                onChange={handleProjectNameChange}
-              />
+              {userRole === 'admin' ? (
+                <input 
+                  className='border border-gray-300 w-[440px] p-2 rounded' 
+                  type="text" 
+                  id="project-name" 
+                  name="project-name" 
+                  value={projectName}
+                  onChange={handleProjectNameChange}
+                />
+              ) : (
+                <input
+                  className='border border-gray-300 w-[440px] p-2 rounded cursor-not-allowed'
+                  type="text"
+                  id="project-name"
+                  name="project-name"
+                  value={projectName}
+                  readOnly
+                />
+              )}
               {errorMessage && (
                 <p className='text-red-600 mt-2 text-sm mb-[-20px] ml-[6px]'>{errorMessage}</p>
               )}
             </div>
             <div className='flex flex-col'>
               <label className='font-semibold text-lg text-black mb-2' htmlFor="project-lead">Project Lead</label>
-              <p className='w-[440px] p-2 text-base font-semibold text-blue-800'>{projectLead}</p>
+              <input 
+                type="text" 
+                id="project-lead" 
+                value={projectLead} 
+                readOnly 
+                className='w-[440px] p-2 text-base font-semibold text-slate-600 bg-white border border-gray-300 rounded-md cursor-not-allowed'
+              />
             </div>
           </div>
           {/* Row */}

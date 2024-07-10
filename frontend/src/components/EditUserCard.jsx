@@ -25,7 +25,7 @@ const EditUserCard = ({ isOpen, onClose, user, onSave }) => {
             <p className='font-semibold text-base'>Username</p>
           </div>
           <div className='flex mt-0'>
-            <p className='w-[500px] ml-2 pl-0 pt-1 text-blue-900 text-base'>{user.name}</p>
+            <p className='w-[500px] ml-2 pl-0 pt-1 text-blue-900 text-base font-bold'>{user.name}</p>
           </div>
           <div className='flex mt-6'>
             <p className='font-semibold text-base'>Role</p>
