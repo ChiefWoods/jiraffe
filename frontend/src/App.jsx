@@ -1,31 +1,68 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
-import { BrowserRouter, Routes, Route, Outlet,useParams } from "react-router-dom";
-import {
-  Test,
-  Login, 
-  Register,
-  Dashboard,
-  Settings,
-} from './pages'
+import "./App.css";
+import { useState, useEffect } from "react";
+import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
+import { getCookie } from "./utils";
+import { Login, Register, Dashboard, Settings } from "./pages";
+import { ToastProvider } from "./contexts/ToastContext";
 
+const Protected = ({ children }) => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!getCookie("token")) {
+      navigate("/login");
+    }
+  }, [navigate]);
+
+  return children;
+};
 
 const App = () => {
+  const [sessionUserID, setSessionUserID] = useState();
+  const [currentProject, setCurrentProject] = useState();
+
   return (
-    <>
+    <ToastProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/test" element={<Test />} />
-          <Route path="/login" element={<Login/>} />
-          <Route path="/register" element={<Register/>}/>
-          <Route path='/dashboard' element={<Dashboard/>}/>
-          <Route path="/settings" element={<Settings/>}/>
+          <Route
+            path="/login"
+            element={
+              <Login
+                setSessionUserID={setSessionUserID}
+                setCurrentProject={setCurrentProject}
+              />
+            }
+          />
+          <Route path="/register" element={<Register />} />
+          <Route
+            path="/dashboard/:projectID"
+            element={
+              <Protected>
+                <Dashboard
+                  sessionUserID={sessionUserID}
+                  currentProject={currentProject}
+                  setCurrentProject={setCurrentProject}
+                />
+              </Protected>
+            }
+          />
+          <Route
+            path="/settings/:projectID"
+            element={
+              <Protected>
+                <Settings
+                  sessionUserID={sessionUserID}
+                  currentProject={currentProject}
+                  setCurrentProject={setCurrentProject}
+                />
+              </Protected>
+            }
+          />
         </Routes>
       </BrowserRouter>
-    </>
-  )
-}
+    </ToastProvider>
+  );
+};
 
-export default App
+export default App;
