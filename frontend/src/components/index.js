@@ -1,23 +1,21 @@
-import Navbar from './Navbar';
-import TaskCard from './TaskCard';
-import AddCard from './AddCard';
-import Work from './TaskItem ';
-import Lane from './lane';
-import EditUserCard from './EditUserCard';
-import UpdateProject from './UpdateProject';
-import AccessTable from './AccessTable';
-import SuccessToast from './SuccessToast';
-import ErrorToast from './ErrorToast';
+import Navbar from "./Navbar";
+import TaskCard from "./TaskCard";
+import AddUserCard from "./AddUserCard";
+import TaskItem from "./TaskItem";
+import Lane from "./Lane";
+import EditUserCard from "./EditUserCard";
+import ProjectDetails from "./ProjectDetails";
+import UsersTable from "./UsersTable";
+import Toast from "./Toast";
 
 export {
   Navbar,
   TaskCard,
-  AddCard,
-  Work,
+  AddUserCard,
+  TaskItem,
   Lane,
   EditUserCard,
-  UpdateProject,
-  AccessTable,
-  SuccessToast,
-  ErrorToast,
-}
+  ProjectDetails,
+  UsersTable,
+  Toast,
+};

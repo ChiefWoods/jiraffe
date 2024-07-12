@@ -1,206 +1,249 @@
-import React, { useState, useEffect } from 'react';
-import Select from 'react-select';
-import { MdOutlineClose } from 'react-icons/md';
+import { useState, useEffect } from "react";
+import { useToast } from "../contexts/ToastContext.jsx";
+import { addTask, editTask, getProjectRole } from "../utils.js";
+import { Toast } from "./index.js";
+import Select from "react-select";
+import { MdOutlineClose } from "react-icons/md";
 import { RiErrorWarningFill } from "react-icons/ri";
 
-const TaskCard = ({ task, isEditing, taskStatusOptions, onClose, availableAssignees, projectID,userRole }) => {
-  const [taskTitle, setTaskTitle] = useState('');
-  const [submitted, setSubmitted] = useState(false);
-  const [taskStatus, setTaskStatus] = useState('');
-  const [taskDescription, setTaskDescription] = useState('');
-  const [dateCreated, setDateCreated] = useState('');
+const TaskCard = ({
+  sessionUserID,
+  projectID,
+  task,
+  isEditing,
+  taskStatusOptions,
+  availableAssignees,
+  closeCard,
+  setTasks,
+}) => {
+  const [taskTitle, setTaskTitle] = useState("");
+  const [taskStatus, setTaskStatus] = useState("");
   const [assignees, setAssignees] = useState([]);
+  const [taskDescription, setTaskDescription] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+  const [userRole, setUserRole] = useState("viewer");
+  const { toastMessage, setToastMessage } = useToast();
 
-  const mapAssigneesToObjects = (assigneeIds) => {
-    return assigneeIds.map(id => {
-      const assignee = availableAssignees.find(user => user.id === id);
-      return assignee ? { value: assignee.id, label: assignee.name } : null;
-    }).filter(assignee => assignee !== null); // Filter out null values if any
-  };
+  const assigneeOptions = availableAssignees.map((assignee) => ({
+    value: assignee.id,
+    label: assignee.name,
+  }));
 
-  console.log(task.assignees)
+  const statusOptions = taskStatusOptions.map((status) => ({
+    value: status,
+    label: status,
+  }));
 
-  useEffect(() => {
-    if (task) {
-      setTaskTitle(task.name || '');
-      setTaskStatus(task.status || '');
-      setTaskDescription(task.desc || '');
-      setDateCreated(task.createdAt || '');
-      if (task.assignees && Array.isArray(task.assignees)) {
-        setAssignees(mapAssigneesToObjects(task.assignees));
-      } else {
-        setAssignees([]);
-      }
-    } else {
-      setTaskTitle('');
-      setTaskStatus('');
-      setTaskDescription('');
-      setDateCreated('');
-      setAssignees([]);
+  function handleStatusChange(selectedOption) {
+    setTaskStatus(selectedOption ? selectedOption.value : "");
+  }
+
+  function handleDescriptionChange(e) {
+    setTaskDescription(e.target.value);
+  }
+
+  function handleAssigneeChange(selectedOptions) {
+    setAssignees(
+      selectedOptions ? selectedOptions.map((option) => option.value) : [],
+    );
+  }
+
+  async function handleSave(e) {
+    e.preventDefault();
+    closeCard();
+
+    if (userRole === "viewer") {
+      return;
     }
-  }, [task, availableAssignees]);
 
-  const handleStatusChange = (selectedOption) => {
-    setTaskStatus(selectedOption ? selectedOption.value : '');
-  };
-
-  const handleDescriptionChange = (event) => {
-    setTaskDescription(event.target.value);
-  };
-
-  const handleAssigneeChange = (selectedOptions) => {
-    setAssignees(selectedOptions || []);
-  };
-
-  const handleSave = async () => {
-    console.log(projectID);
     setSubmitted(true);
-    if (taskTitle.trim() === '' || taskDescription.trim() === '') {
-      return; // Do not proceed if taskTitle or taskDescription is empty
+
+    if (taskTitle.trim() === "" || taskDescription.trim() === "") {
+      return;
     }
+
     const taskData = {
       name: taskTitle,
       status: taskStatus,
       desc: taskDescription,
-      createdAt: dateCreated,
-      assignees: assignees.map(assignee => assignee.value) // Only send the IDs
-    };
-    console.log(taskData);
-
-    const requestOptions = {
-      method: isEditing ? 'PUT' : 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(taskData)
+      assignees,
     };
 
-    try {
-      const response = await fetch(`${import.meta.env.VITE_BACK_END_URL}/${isEditing ? `task/${task._id}` : `project/${projectID}/task`}`, requestOptions);
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      window.location.reload();
-      onClose();
-    } catch (error) {
-      console.error('Error saving task:', error);
+    const result = isEditing
+      ? await editTask(task._id, taskData)
+      : await addTask(projectID, taskData);
+
+    setTasks((prev) => {
+      return isEditing
+        ? prev.map((task) =>
+            task._id === result.task._id ? result.task : task,
+          )
+        : [...prev, result.task];
+    });
+
+    setToastMessage(result.message);
+  }
+
+  const customStyles = {
+    control: (provided) => ({
+      ...provided,
+      fontSize: "14px",
+    }),
+    option: (provided) => ({
+      ...provided,
+      fontSize: "14px",
+    }),
+  };
+
+  useEffect(() => {
+    async function fetchData() {
+      const role = await getProjectRole(projectID, sessionUserID);
+      setUserRole(role);
     }
-  };
 
-  const formatDate = (dateString) => {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    return date.toLocaleDateString();
-  };
+    setTaskTitle(task.name || "");
+    setTaskStatus(task.status || "");
+    setTaskDescription(task.desc || "");
+    setAssignees(task.assignees ?? []);
 
-  const assigneeOptions = availableAssignees.map(assignee => ({
-    value: assignee.id,
-    label: assignee.name
-  }));
-  const statusOptions = taskStatusOptions.map(status => ({ value: status, label: status }));
+    fetchData();
+  }, [task, availableAssignees]);
 
   return (
-    <div className='z-40 fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50'>
-      <div className='border-2 mx-auto bg-white px-12 py-6 rounded-md shadow-md flex flex-col w-[50%] h-[65%] max-w-full relative z-50'>
+    <div className="fixed inset-0 z-40 flex items-center justify-center bg-gray-900 bg-opacity-50">
+      <div className="relative z-50 mx-auto flex h-[560px] w-[50%] max-w-full flex-col rounded-md border-2 bg-white pl-[40px] pr-[50px] pt-[30px] shadow-md">
         <form>
-          <div className='justify-between flex flex-row h-[90%]'>
-            <div className={` ${isEditing ? 'w-[80%]' : 'w-[100%]'}`}>
-              <div className=''>
-                <h2 className='text-[30px] font-semibold mb-2 text-[#0052CC]'>{isEditing ? 'Edit Task' : 'Add Task'}</h2>
+          <div className="flex h-[90%] flex-row justify-between gap-x-4">
+            <div className="w-[80%]">
+              <div>
+                <h2 className="mb-2 text-[30px] font-semibold text-[#0052CC]">
+                  {userRole === "viewer" ? "View" : "Edit"} Details
+                </h2>
                 <div>
-                  <div className='flex flex-row mb-2'>
-                    <p className='font-semibold  mr-4'>Task Title:</p>
-                    {submitted && taskTitle.trim() === '' && (
-                      <div className='flex items-center'>
-                        <RiErrorWarningFill className='text-red-500 text-[14px] mr-1' />
-                        <p className='text-red-500 italic text-[14px]'>Task title is required</p>
+                  <div className="mb-2 mt-[24px] flex flex-row">
+                    <p className="mb-[-4px] mr-4 text-[18px] font-semibold">
+                      Task Title:
+                    </p>
+                    {submitted && taskTitle.trim() === "" && (
+                      <div className="flex items-center">
+                        <RiErrorWarningFill className="mr-1 text-[14px] text-red-500" />
+                        <p className="text-[14px] italic text-red-500">
+                          Title is required.
+                        </p>
                       </div>
                     )}
                   </div>
                   <input
-                    type='text'
-                    className='text-sm w-full p-2 mb-2 bg-[#ffffff] border-2 text-black focus:outline-none focus:ring-2 focus:ring-blue-500 rounded'
-                    placeholder='Task title...'
+                    type="text"
+                    className={`w-full rounded border-[0.8px] p-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${userRole === "viewer" ? "pointer-events-none border-[#e6e6e6] bg-[#f2f2f2] text-[#999999]" : "border-[#cccccc] bg-[#ffffff] text-black"}`}
                     value={taskTitle}
                     onChange={(e) => setTaskTitle(e.target.value)}
-                  />
-                </div>
-
-                <div className='mb-2'>
-                  <p className='font-semibold mb-2'>Task Progress:</p>
-                  <Select
-                    options={statusOptions}
-                    value={statusOptions.find(option => option.value === taskStatus)}
-                    onChange={handleStatusChange}
-                    className='basic-single'
-                    classNamePrefix='select'
-                    placeholder='Select...'
+                    readOnly={userRole === "viewer"}
                     required
                   />
                 </div>
-                <div>
-                  <p className='font-semibold mb-2'>Assignee:</p>
+
+                <div className="mb-2 mt-[20px]">
+                  <p className="mb-[4px] text-[18px] font-semibold">
+                    Task Progress:
+                  </p>
+                  <Select
+                    options={statusOptions}
+                    value={statusOptions.find(
+                      (option) => option.value === taskStatus,
+                    )}
+                    onChange={handleStatusChange}
+                    styles={customStyles}
+                    placeholder="Select..."
+                    isDisabled={userRole === "viewer"}
+                  />
+                </div>
+                <div className="mt-[20px]">
+                  <p className="mb-[4px] text-[18px] font-semibold">
+                    Assignees:
+                  </p>
                   <Select
                     isMulti
                     options={assigneeOptions}
-                    value={assignees}
+                    value={assigneeOptions.filter((option) =>
+                      assignees.includes(option.value),
+                    )}
                     onChange={handleAssigneeChange}
-                    className='basic-multi-select mb-4'
-                    classNamePrefix='select'
+                    styles={customStyles}
+                    classNamePrefix="select"
+                    isDisabled={userRole === "viewer"}
                   />
                 </div>
               </div>
-              <div className='mb-4'>
-                <div className='flex flex-row mb-2'>
-                  <p className='font-semibold mr-4'>Description:</p>
-                  {submitted && taskDescription.trim() === '' && (
-                    <div className='flex items-center'>
-                      <RiErrorWarningFill className='text-red-500 text-[14px] mr-1' />
-                      <p className='text-red-500 italic text-[14px]'>Description is required</p>
+              <div className="mb-4">
+                <div className="mb-2 mt-[20px] flex flex-row">
+                  <p className="mb-[-4px] mr-4 text-[18px] font-semibold">
+                    Description:
+                  </p>
+                  {submitted && taskDescription.trim() === "" && (
+                    <div className="flex items-center">
+                      <RiErrorWarningFill className="mr-1 text-[14px] text-red-500" />
+                      <p className="text-[14px] italic text-red-500">
+                        Description is required.
+                      </p>
                     </div>
                   )}
                 </div>
                 <textarea
-                  type='text'
-                  className='text-sm w-full p-2 bg-[#ffffff] border-2 text-black focus:outline-none focus:ring-2 focus:ring-blue-500 rounded resize-none overflow-hidden'
-                  placeholder='Add a description...'
+                  type="text"
+                  className={`w-full resize-none overflow-hidden rounded border-[0.8px] p-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${userRole === "viewer" ? "pointer-events-none border-[#e6e6e6] bg-[#f2f2f2] text-[#999999]" : "border-[#cccccc] bg-[#ffffff] text-black"}`}
+                  placeholder="Add a description..."
                   value={taskDescription}
                   onChange={handleDescriptionChange}
+                  readOnly={userRole === "viewer"}
                   required
                 />
               </div>
             </div>
-            {isEditing && (
-              <div className='mt-6 mr-6 '>
-                <div className='mb-4'>
-                  <p className='text-gray-700 font-semibold'>Created:</p>
-                  <p className='text-sm text-gray-500'>{dateCreated ? formatDate(dateCreated) : 'N/A'}</p>
+            <div className="mr-6 mt-[60px]">
+              {task.createdAt && (
+                <div className="mb-4">
+                  <p className="font-semibold text-gray-700">Created:</p>
+                  <p className="mt-[4px] text-sm text-gray-500">
+                    {new Date(task.createdAt).toLocaleDateString()}
+                  </p>
                 </div>
-              </div>
-            )}
-          </div>
-          <div className={` ${isEditing ? 'w-[80%]' : 'w-[100%]'}`}>
-            <div className='float-end'>
-              <button
-                type='button'
-                className='bg-slate-400 hover:bg-slate-500 text-white py-2 px-4 rounded-md'
-                onClick={onClose}
-              >
-                Cancel
-              </button>
-              <button
-                type='button'
-                className='bg-blue-600 hover:bg-[#0052CC] text-white py-2 px-4 rounded-md ml-3'
-                onClick={handleSave}
-              >
-                {isEditing ? 'Done' : 'Add'}
-              </button>
+              )}
             </div>
           </div>
+          {userRole !== "viewer" && (
+            <div className="mt-[2px] w-[80%]">
+              <div className="float-end">
+                <button
+                  type="button"
+                  className="rounded-md bg-slate-400 px-4 py-2 text-white hover:bg-slate-500"
+                  onClick={closeCard}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="ml-[30px] rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-[#0052CC]"
+                  onClick={handleSave}
+                >
+                  {isEditing ? "Done" : "Add"}
+                </button>
+              </div>
+            </div>
+          )}
         </form>
         <MdOutlineClose
-          className='absolute top-4 right-4 font-bold text-slate-400 hover:text-slate-500 text-[35px] cursor-pointer'
-          onClick={onClose}
+          className="absolute right-[30px] top-[24px] cursor-pointer text-[35px] font-bold text-slate-400 hover:text-slate-500"
+          onClick={closeCard}
         />
       </div>
+      {toastMessage && (
+        <Toast
+          type="success"
+          message={toastMessage}
+          onClose={() => setToastMessage(null)}
+        />
+      )}
     </div>
   );
 };

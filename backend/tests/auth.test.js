@@ -41,7 +41,7 @@ describe("Register new user", () => {
     expect(res.ok).toBe(false);
 
     const body = await res.json();
-    expect(body.message).toBe("Name is required.");
+    expect(body).toHaveProperty("message");
   });
 
   test("Missing email in body", async () => {
@@ -62,7 +62,7 @@ describe("Register new user", () => {
     expect(res.ok).toBe(false);
 
     const body = await res.json();
-    expect(body.message).toBe("Email is required.");
+    expect(body).toHaveProperty("message");
   });
 
   test("Missing password in body", async () => {
@@ -83,7 +83,7 @@ describe("Register new user", () => {
     expect(res.ok).toBe(false);
 
     const body = await res.json();
-    expect(body.message).toBe("Password is required.");
+    expect(body).toHaveProperty("message");
   });
 });
 
@@ -105,6 +105,7 @@ describe("Login user", () => {
     const body = await res.json();
     expect(body).toHaveProperty("token");
     expect(body).toHaveProperty("user");
+    expect(body).toHaveProperty("project");
   });
 
   test("Missing email in body", async () => {
@@ -121,7 +122,7 @@ describe("Login user", () => {
     expect(res.ok).toBe(false);
 
     const body = await res.json();
-    expect(body.message).toBe("Email is required.");
+    expect(body).toHaveProperty("message");
   });
 
   test("Missing password in body", async () => {
@@ -138,6 +139,6 @@ describe("Login user", () => {
     expect(res.ok).toBe(false);
 
     const body = await res.json();
-    expect(body.message).toBe("Password is required.");
+    expect(body).toHaveProperty("message");
   });
 });

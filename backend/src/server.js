@@ -22,9 +22,9 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
-app.use("/project", projectRouter);
+app.use("/projects", projectRouter);
 app.use("/auth", authRouter);
-app.use("/user", userRouter);
-app.use("/task", taskRouter);
+app.use("/users", userRouter);
+app.use("/tasks", taskRouter);
 
 app.listen(port, () => console.log(`Listening on port ${port}`));

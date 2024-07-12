@@ -7,13 +7,11 @@ import Project from "../models/projectModel.js";
 const authRouter = Router();
 
 /**
- * Verifies the JWT token in the authorization header of the request. If the token is valid,
- * it calls the next middleware function. If the token is missing or invalid, it sends an
- * appropriate error response.
+ * Verifies the JWT token in the authorization header of the request.
  *
- * @param {Object} req - The request object.
- * @param {Object} res - The response object.
- * @param {Function} next - The next middleware function.
+ * @param {Request} req - The request object.
+ * @param {Response} res - The response object.
+ * @param {NextFunction} next - The next function.
  * @return {void}
  */
 export function verifyToken(req, res, next) {
@@ -25,7 +23,7 @@ export function verifyToken(req, res, next) {
 
   const token = authHeader.split(" ")[1];
 
-  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+  jwt.verify(token, process.env.JWT_SECRET, (err) => {
     if (err) {
       return res.status(403).json({ message: "Invalid or expired token." });
     }
@@ -34,6 +32,14 @@ export function verifyToken(req, res, next) {
   });
 }
 
+/**
+ * Checks if the email exists in the request body.
+ *
+ * @param {Request} req - The request object.
+ * @param {Response} res - The response object.
+ * @param {NextFunction} next - The next function.
+ * @returns {void}
+ */
 function checkEmailBody(req, res, next) {
   if (!req.body.email) {
     return res.status(400).json({ message: "Email is required." });
@@ -42,6 +48,14 @@ function checkEmailBody(req, res, next) {
   next();
 }
 
+/**
+ * Checks if the password exists in the request body.
+ *
+ * @param {Request} req - The request object.
+ * @param {Response} res - The response object.
+ * @param {NextFunction} next - The next function.
+ * @returns {void}
+ */
 function checkPasswordBody(req, res, next) {
   if (!req.body.password) {
     return res.status(400).json({ message: "Password is required." });
@@ -105,12 +119,14 @@ authRouter.post(
       const isPasswordValid = await bcrypt.compare(password, user.password);
 
       if (!isPasswordValid) {
-        return res.status(401).json({ error: "Invalid password." });
+        return res.status(401).json({ message: "Invalid password." });
       }
 
       const token = jwt.sign({ user_id: user._id }, process.env.JWT_SECRET, {
         expiresIn: "7d",
       });
+
+      const project = await Project.findOne({ admin: user._id });
 
       res.status(200).json({
         token,
@@ -119,6 +135,7 @@ authRouter.post(
           email: user.email,
           _id: user._id,
         },
+        project,
       });
     } catch (err) {
       res.status(500).json({ message: err.message });

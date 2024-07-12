@@ -21,10 +21,10 @@ const taskSchema = mongoose.Schema(
     },
     assignees: [
       {
-        type:mongoose.Schema.Types.ObjectId,
-        required:true,
-        ref:"User"
-      }
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+        ref: "User",
+      },
     ],
   },
   {
