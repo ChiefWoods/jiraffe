@@ -4,6 +4,10 @@
 
 Task management tool for SWE3033 Software Processes.
 
+[Live Website](https://jiraffe.vercel.app/login)
+
+[Backend API](https://jiraffe-backend.onrender.com)
+
 [Source Repository](https://github.com/ChiefWoods/jiraffe-task-management)
 
 ## Features
