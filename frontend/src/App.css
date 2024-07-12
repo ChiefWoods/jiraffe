@@ -1,27 +1,27 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700;800;900&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700;800;900&display=swap");
+
 body {
-  
   font-family: "Poppins", sans-serif;
-  
 }
 
 h1 {
-  @apply xl:text-5xl lg:text-4xl md:text-3xl text-2xl;
+  @apply text-2xl md:text-3xl lg:text-4xl xl:text-5xl;
 }
 
 h2 {
-  @apply xl:text-4xl lg:text-3xl md:text-2xl text-xl;
+  @apply text-xl md:text-2xl lg:text-3xl xl:text-4xl;
 }
 
 p {
-  @apply xl:text-xl lg:text-lg text-base;
-}
-.title {
-  @apply xl:text-7xl lg:text-6xl md:text-5xl text-4xl;
+  @apply text-base lg:text-lg xl:text-xl;
 }
 
-.label{
-  @apply xl:text-xl lg:text-lg text-base;
+.title {
+  @apply text-4xl md:text-5xl lg:text-6xl xl:text-7xl;
+}
+
+.label {
+  @apply text-base lg:text-lg xl:text-xl;
 }
 
 .logo {
@@ -30,15 +30,17 @@ p {
   will-change: filter;
   transition: filter 300ms;
 }
+
 .logo:hover {
   filter: drop-shadow(0 0 2em #646cffaa);
 }
+
 .logo.react:hover {
   filter: drop-shadow(0 0 2em #61dafbaa);
 }
 
 .my-div {
-  transition: background-color 0.3s; /* Smooth transition */
+  transition: background-color 0.3s;
 }
 
 .my-div:hover {

@@ -1,11 +1,26 @@
 import { Router } from "express";
+import mongoose from "mongoose";
+import { verifyToken } from "./authRoute.js";
 import Task from "../models/taskModel.js";
+import User from "../models/userModel.js";
 
 const taskRouter = Router();
 
+/**
+ * Checks if the task ID exists and is a valid MongoDB Object ID.
+ *
+ * @param {Request} req - The request object.
+ * @param {Response} res - The response object.
+ * @param {NextFunction} next - The next function.
+ * @returns {void}
+ */
 function checkTaskIdParam(req, res, next) {
-  if (!req.params.task_id) {
+  const { task_id } = req.params;
+
+  if (!task_id) {
     return res.status(400).json({ message: "Task ID is required." });
+  } else if (!mongoose.Types.ObjectId.isValid(task_id)) {
+    return res.status(400).json({ message: "Task ID is not valid." });
   }
 
   next();
@@ -13,7 +28,7 @@ function checkTaskIdParam(req, res, next) {
 
 taskRouter
   .route("/:task_id")
-  .all(checkTaskIdParam)
+  .all(verifyToken, checkTaskIdParam)
   // Get task
   .get(async (req, res) => {
     try {
@@ -34,12 +49,20 @@ taskRouter
   .put(async (req, res) => {
     try {
       const { task_id } = req.params;
-      const { name, desc, status, assignee } = req.body;
-      console.log(req.body);
-      if (!name && !desc && !status && !assignee) {
+      const { name, desc, status, assignees } = req.body;
+
+      if (!name && !desc && !status && !assignees?.length) {
         return res
           .status(400)
           .json({ message: "At least one field is required." });
+      }
+
+      if (!assignees?.length) {
+        return res
+          .status(400)
+          .json({ message: "At least one assignee is required." });
+      } else if (await assignees.some((_id) => !User.exists({ _id }))) {
+        return res.status(404).json({ message: "Assignee does not exist." });
       }
 
       if (status && !["TO DO", "IN PROGRESS", "DONE"].includes(status)) {
@@ -49,15 +72,25 @@ taskRouter
         });
       }
 
-      const result = await Task.findByIdAndUpdate(task_id, req.body, {
+      const newTask = {
+        ...(name && { name }),
+        ...(desc && { desc }),
+        ...(status && { status }),
+        ...(assignees?.length && { assignees }),
+      };
+
+      const task = await Task.findByIdAndUpdate(task_id, newTask, {
         new: true,
       });
 
-      if (!result) {
+      if (!task) {
         return res.status(404).json({ message: "Task not found." });
       }
 
-      res.status(200).json({ task: result });
+      res.status(200).json({
+        message: "Task updated successfully.",
+        task,
+      });
     } catch (err) {
       res.status(500).json({ message: err.message });
     }
@@ -73,7 +106,7 @@ taskRouter
         return res.status(404).json({ message: "Task not found." });
       }
 
-      res.status(200).json({ message: `Task ${task_id} deleted.` });
+      res.status(200).json({ message: "Task deleted successfully." });
     } catch (err) {
       res.status(500).json({ message: err.message });
     }

@@ -14,8 +14,8 @@ const mockTask = {
 const taskHandlers = [
   // Get task
   http.get(
-    `${import.meta.env.BACKEND_URL}/tasks/:task_id`,
-    async ({ params }) => {
+    `${import.meta.env.VITE_BACKEND_URL}}/tasks/:task_id`,
+    ({ params }) => {
       if (!params.task_id) {
         return HttpResponse.json(
           { message: "Task ID is required." },
@@ -33,7 +33,7 @@ const taskHandlers = [
   ),
   // Update task
   http.put(
-    `${import.meta.env.BACKEND_URL}/tasks/:task_id`,
+    `${import.meta.env.VITE_BACKEND_URL}}/tasks/:task_id`,
     async ({ request, params }) => {
       if (!params.task_id) {
         return HttpResponse.json(
@@ -44,7 +44,7 @@ const taskHandlers = [
 
       const body = await request.json();
 
-      if (!body.name && !body.desc && !body.status && !body.assignee) {
+      if (!body.name && !body.desc && !body.status && !body.assignees?.length) {
         return HttpResponse.json(
           { message: "At least one field is required." },
           { status: 400 },
@@ -78,8 +78,8 @@ const taskHandlers = [
   ),
   // Delete task
   http.delete(
-    `${import.meta.env.BACKEND_URL}/tasks/:task_id`,
-    async ({ params }) => {
+    `${import.meta.env.VITE_BACKEND_URL}}/tasks/:task_id`,
+    ({ params }) => {
       if (!params.task_id) {
         return HttpResponse.json(
           { message: "Task ID is required." },
