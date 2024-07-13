@@ -1,6 +1,12 @@
 import "./App.css";
 import { useState, useEffect } from "react";
-import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  useNavigate,
+  Navigate,
+} from "react-router-dom";
 import { getCookie } from "./utils";
 import { Login, Register, Dashboard, Settings } from "./pages";
 import { ToastProvider } from "./contexts/ToastContext";
@@ -25,6 +31,7 @@ const App = () => {
     <ToastProvider>
       <BrowserRouter>
         <Routes>
+          <Route path="/" element={<Navigate to="/login" replace />} />
           <Route
             path="/login"
             element={
@@ -59,6 +66,7 @@ const App = () => {
               </Protected>
             }
           />
+          <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </BrowserRouter>
     </ToastProvider>
