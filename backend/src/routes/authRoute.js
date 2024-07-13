@@ -33,6 +33,18 @@ export function verifyToken(req, res, next) {
 }
 
 /**
+ * Generates a JSON Web Token (JWT) for the given user ID.
+ *
+ * @param {string} userID - The ID of the user to generate the token for.
+ * @return {string} The generated JWT.
+ */
+function signToken(userID) {
+  return jwt.sign({ userID }, process.env.JWT_SECRET, {
+    expiresIn: "7d",
+  });
+}
+
+/**
  * Checks if the email exists in the request body.
  *
  * @param {Request} req - The request object.
@@ -122,9 +134,7 @@ authRouter.post(
         return res.status(401).json({ message: "Invalid password." });
       }
 
-      const token = jwt.sign({ user_id: user._id }, process.env.JWT_SECRET, {
-        expiresIn: "7d",
-      });
+      const token = signToken(user._id);
 
       const project = await Project.findOne({ admin: user._id });
 
@@ -142,5 +152,39 @@ authRouter.post(
     }
   },
 );
+
+// Refresh token
+authRouter.post("/refresh", async (req, res) => {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader) {
+    return res.status(401).json({ message: "Authorization header missing." });
+  }
+
+  const token = authHeader.split(" ")[1];
+
+  if (!token) {
+    return res.status(401).json({ message: "Token is required." });
+  }
+
+  jwt.verify(token, process.env.JWT_SECRET, async (err, { userID, exp }) => {
+    if (err) {
+      return res.status(403).json({ message: "Invalid or expired token." });
+    } else {
+      const user = await User.findById(userID);
+      const project = await Project.findOne({ admin: user._id });
+
+      return res.status(200).json({
+        token: exp - Date.now() / 1000 > 60 * 15 ? signToken(userID) : token,
+        user: {
+          name: user.name,
+          email: user.email,
+          _id: user._id,
+        },
+        project,
+      });
+    }
+  });
+});
 
 export default authRouter;

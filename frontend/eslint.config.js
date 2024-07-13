@@ -44,6 +44,7 @@ export default [
             body: 1,
             parameters: 2,
           },
+          offsetTernaryExpressions: true,
         },
       ],
       quotes: [

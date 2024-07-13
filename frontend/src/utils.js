@@ -354,3 +354,21 @@ export async function loginUser(email, password) {
     throw new Error(data.message);
   }
 }
+
+export async function refreshToken() {
+  const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/auth/refresh`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${getCookie("token")}`,
+    },
+  }).catch(console.error);
+
+  const data = await res.json();
+
+  if (res.ok) {
+    return data;
+  } else {
+    throw new Error(data.message);
+  }
+}

@@ -44,11 +44,16 @@ const Navbar = ({ sessionUserID, currentProject }) => {
         {currentProject && (
           <li
             key={currentProject._id}
-            className="cursor-default tracking-wider text-white"
+            className="cursor-default tracking-wider text-white hover:scale-105"
           >
-            <p className="block w-full rounded-[16px] bg-blue-600 px-[20px] py-[6px] text-[15px] font-bold focus:outline-none">
-              {currentProject.name}
-            </p>
+            <Link to={`/dashboard/${currentProject._id}`}>
+              <button
+                type="button"
+                className="block w-full rounded-[16px] bg-blue-600 px-[20px] py-[6px] text-left text-[15px] font-bold text-white focus:outline-none"
+              >
+                {currentProject.name}
+              </button>
+            </Link>
           </li>
         )}
         {projects.map((project) => (
@@ -71,11 +76,11 @@ const Navbar = ({ sessionUserID, currentProject }) => {
       </ul>
       <div className="mb-6 flex flex-grow flex-col justify-end">
         <ul className="flex flex-col items-center space-y-[30px]">
-          <li className="flex w-full items-center justify-center">
+          <li className="flex w-full items-center justify-center gap-x-3">
             <IconContext.Provider value={{ color: "white " }}>
               <FaUser />
             </IconContext.Provider>
-            <p className="px-4 py-2 text-center text-sm font-bold tracking-wider text-white">
+            <p className="py-2 text-center text-sm font-bold tracking-wider text-white">
               {userName}
             </p>
           </li>
