@@ -4,9 +4,9 @@
 
 Task management tool for SWE3033 Software Processes.
 
-[Live Website](https://jiraffe.vercel.app/login)
+[Live Website](https://jiraffe.vercel.app)
 
-[Backend API](https://jiraffe-backend.onrender.com)
+[API](https://jiraffe-backend.onrender.com)
 
 [Source Repository](https://github.com/ChiefWoods/jiraffe-task-management)
 
@@ -114,6 +114,16 @@ View the [open issues](https://github.com/ChiefWoods/jiraffe-task-management/iss
 
 - [Render](https://render.com/)
 - [Vercel](https://vercel.com/home)
+
+### Contributors
+
+Huge thanks to my groupmates for helping me put this together.
+
+- [eesuhn](https://github.com/eesuhn)  
+- [CWeyK](https://github.com/CWeyK)  
+- [dionnieteh](https://github.com/dionnieteh)  
+- [Karweiii](https://github.com/Karweiii)  
+- [shai](https://github.com/shai-mohan)
 
 ## Contact
 
