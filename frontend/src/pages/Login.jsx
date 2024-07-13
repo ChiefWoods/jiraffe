@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { loginUser } from "../utils.js";
+import { getCookie, loginUser, refreshToken } from "../utils.js";
 import { logo_title, Foambg } from "../assets";
 import { FaArrowRightToBracket } from "react-icons/fa6";
 
@@ -11,15 +11,22 @@ const Login = ({ setSessionUserID, setCurrentProject }) => {
 
   const navigate = useNavigate();
 
+  function initializeSession(token, userID, project) {
+    setSessionUserID(userID);
+    setCurrentProject(project);
+    document.cookie = `token=${token}; max-age=${60 * 60 * 24 * 7}`;
+    navigate(`/dashboard/${project._id}`);
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
 
     if (email && password) {
-      const data = await loginUser(email, password);
-      setSessionUserID(data.user._id);
-      setCurrentProject(data.project);
-      document.cookie = `token=${data.token}; max-age=${60 * 60 * 24 * 7}`;
-      navigate(`/dashboard/${data.project._id}`);
+      const { token, user, project } = await loginUser(email, password).catch(
+        console.error,
+      );
+
+      initializeSession(token, user._id, project);
     } else if (!email && !password) {
       setErrorMessage("Please fill out all fields.");
     } else if (!email) {
@@ -28,6 +35,22 @@ const Login = ({ setSessionUserID, setCurrentProject }) => {
       setErrorMessage("Password is required.");
     }
   }
+
+  useEffect(() => {
+    async function fetchData() {
+      if (!getCookie("token")) return;
+
+      try {
+        const { token, user, project } = await refreshToken();
+
+        initializeSession(token, user._id, project);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    fetchData();
+  }, []);
 
   return (
     <>
